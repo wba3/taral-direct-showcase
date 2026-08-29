@@ -63,7 +63,7 @@ function Samples() {
         address: form.address,
       },
       shipping,
-      carrierAccount: carrierAccount || undefined,
+      carrierAccount: carrierAccount,
       items: samples.map((l) => ({
         productId: l.productId,
         code: l.code,
