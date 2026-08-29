@@ -109,7 +109,11 @@ function AccountPage() {
               <li key={loc.label} className="py-3">
                 <p className="text-sm font-medium">
                   {loc.label}
-                  {loc.default && <DemoTag tone="neutral" className="ml-2">Default</DemoTag>}
+                  {loc.default && (
+                    <DemoTag tone="neutral" className="ml-2">
+                      Default
+                    </DemoTag>
+                  )}
                 </p>
                 <p className="spec-note mt-0.5">{loc.address}</p>
               </li>
@@ -136,7 +140,11 @@ function AccountPage() {
               <thead>
                 <tr className="border-b border-border text-left">
                   {["Name", "Title", "Email", "Role", ""].map((h) => (
-                    <th key={h} scope="col" className="label-caps py-2.5 pr-4 text-muted-foreground">
+                    <th
+                      key={h}
+                      scope="col"
+                      className="label-caps py-2.5 pr-4 text-muted-foreground"
+                    >
                       {h}
                     </th>
                   ))}

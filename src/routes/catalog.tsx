@@ -4,7 +4,11 @@ import { toast } from "sonner";
 import { LayoutGrid, Rows3, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CatalogFilters, useCatalogFilter, type FilterState } from "@/components/site/CatalogFilters";
+import {
+  CatalogFilters,
+  useCatalogFilter,
+  type FilterState,
+} from "@/components/site/CatalogFilters";
 import { ProductCard } from "@/components/site/ProductCard";
 import { PRODUCTS } from "@/data/products";
 import { useDemo } from "@/lib/demo-store";
@@ -12,7 +16,12 @@ import { useDemo } from "@/lib/demo-store";
 export const Route = createFileRoute("/catalog")({
   validateSearch: (
     search: Record<string, unknown>,
-  ): { q?: string | undefined; vol?: string | undefined; neck?: string | undefined; category?: string | undefined } => ({
+  ): {
+    q?: string | undefined;
+    vol?: string | undefined;
+    neck?: string | undefined;
+    category?: string | undefined;
+  } => ({
     q: typeof search["q"] === "string" ? (search["q"] as string) : undefined,
     vol: typeof search["vol"] === "string" ? (search["vol"] as string) : undefined,
     neck: typeof search["neck"] === "string" ? (search["neck"] as string) : undefined,

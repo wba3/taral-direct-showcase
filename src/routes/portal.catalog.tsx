@@ -211,8 +211,9 @@ function PrivateCatalog() {
                       <p className="label-caps text-muted-foreground">Available to sell</p>
                       <p className="spec-note mt-1">
                         {(product.availableToSell ?? 0).toLocaleString()} ea ·{" "}
-                        {product.warehouses?.map((w) => `${w.code} ${w.qty.toLocaleString()}`).join(" · ") ||
-                          "No stocking warehouse"}
+                        {product.warehouses
+                          ?.map((w) => `${w.code} ${w.qty.toLocaleString()}`)
+                          .join(" · ") || "No stocking warehouse"}
                       </p>
                       <p className="spec-note">As of {account.asOf}</p>
                     </div>

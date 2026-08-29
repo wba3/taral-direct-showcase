@@ -20,13 +20,7 @@ function StockMark({ product }: { product: Product }) {
   );
 }
 
-export function PriceState({
-  product,
-  mode,
-}: {
-  product: Product;
-  mode: "public" | "portal";
-}) {
+export function PriceState({ product, mode }: { product: Product; mode: "public" | "portal" }) {
   if (mode === "portal") {
     if (product.demoUnitPrice === null) {
       return (

@@ -4,12 +4,7 @@
  * customer's simulated records.
  */
 
-export type OrderStatus =
-  | "Submitted"
-  | "Confirmed"
-  | "In production"
-  | "Shipped"
-  | "Delivered";
+export type OrderStatus = "Submitted" | "Confirmed" | "In production" | "Shipped" | "Delivered";
 
 export const ORDER_TIMELINE: OrderStatus[] = [
   "Submitted",
