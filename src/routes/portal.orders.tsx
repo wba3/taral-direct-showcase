@@ -10,8 +10,8 @@ import { ACCOUNT, ORDER_TIMELINE, getAccount, type DemoOrder } from "@/data/port
 import { money } from "@/data/products";
 
 export const Route = createFileRoute("/portal/orders")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    order: typeof search.order === "string" ? search.order : undefined,
+  validateSearch: (search: Record<string, unknown>): { order?: string } => ({
+    order: typeof search["order"] === "string" ? (search["order"] as string) : undefined,
   }),
   component: Orders,
 });

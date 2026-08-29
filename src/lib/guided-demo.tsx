@@ -86,11 +86,11 @@ export function GuidedDemoProvider({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { accountId, enterDemo } = useDemo();
 
-  const step = DEMO_STEPS[index];
+  const step = DEMO_STEPS[index] ?? DEMO_STEPS[0]!;
 
   const goTo = useCallback(
     (i: number) => {
-      const next = DEMO_STEPS[Math.max(0, Math.min(DEMO_STEPS.length - 1, i))];
+      const next = DEMO_STEPS[Math.max(0, Math.min(DEMO_STEPS.length - 1, i))]!;
       setIndex(DEMO_STEPS.indexOf(next));
       if (next.needsPortal && !accountId) enterDemo(ACCOUNT.id);
       navigate({ to: next.to });

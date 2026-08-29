@@ -58,7 +58,7 @@ export function PortalShell({
             <li key={item.to}>
               <Link
                 to={item.to}
-                activeOptions={{ exact: item.exact ?? false }}
+                activeOptions={{ exact: "exact" in item ? item.exact : false }}
                 className="label-caps -mb-px inline-block border-b-2 border-transparent px-3 py-3 text-muted-foreground hover:text-foreground"
                 activeProps={{ className: "label-caps border-accent text-foreground" }}
               >

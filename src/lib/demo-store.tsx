@@ -187,7 +187,8 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       const next = [...s.draft];
       for (const line of order.lines) {
         const idx = next.findIndex((l) => l.productId === line.productId);
-        if (idx >= 0) next[idx] = { ...next[idx], cases: next[idx].cases + line.cases };
+        const existing = idx >= 0 ? next[idx] : undefined;
+        if (existing) next[idx] = { ...existing, cases: existing.cases + line.cases };
         else
           next.push({
             productId: line.productId,

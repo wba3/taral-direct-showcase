@@ -10,11 +10,13 @@ import { PRODUCTS } from "@/data/products";
 import { useDemo } from "@/lib/demo-store";
 
 export const Route = createFileRoute("/catalog")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    q: typeof search.q === "string" ? search.q : undefined,
-    vol: typeof search.vol === "string" ? search.vol : undefined,
-    neck: typeof search.neck === "string" ? search.neck : undefined,
-    category: typeof search.category === "string" ? search.category : undefined,
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { q?: string; vol?: string; neck?: string; category?: string } => ({
+    q: typeof search["q"] === "string" ? (search["q"] as string) : undefined,
+    vol: typeof search["vol"] === "string" ? (search["vol"] as string) : undefined,
+    neck: typeof search["neck"] === "string" ? (search["neck"] as string) : undefined,
+    category: typeof search["category"] === "string" ? (search["category"] as string) : undefined,
   }),
   head: () => ({
     meta: [
