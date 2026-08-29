@@ -15,6 +15,9 @@ import { Route as PortalRouteImport } from './routes/portal'
 import { Route as SamplesRouteImport } from './routes/samples'
 import { Route as PortalIndexRouteImport } from './routes/portal.index'
 import { Route as PortalCatalogRouteImport } from './routes/portal.catalog'
+import { Route as PortalInvoicesRouteImport } from './routes/portal.invoices'
+import { Route as PortalOrdersRouteImport } from './routes/portal.orders'
+import { Route as PortalPriceBookRouteImport } from './routes/portal.price-book'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +50,21 @@ const PortalCatalogRoute = PortalCatalogRouteImport.update({
   path: '/catalog',
   getParentRoute: () => PortalRoute,
 } as any)
+const PortalInvoicesRoute = PortalInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => PortalRoute,
+} as any)
+const PortalOrdersRoute = PortalOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => PortalRoute,
+} as any)
+const PortalPriceBookRoute = PortalPriceBookRouteImport.update({
+  id: '/price-book',
+  path: '/price-book',
+  getParentRoute: () => PortalRoute,
+} as any)
 const ProductIdRoute = ProductIdRouteImport.update({
   id: '/product/$id',
   path: '/product/$id',
@@ -59,6 +77,9 @@ export interface FileRoutesByFullPath {
   '/portal': typeof PortalRouteWithChildren
   '/samples': typeof SamplesRoute
   '/portal/catalog': typeof PortalCatalogRoute
+  '/portal/invoices': typeof PortalInvoicesRoute
+  '/portal/orders': typeof PortalOrdersRoute
+  '/portal/price-book': typeof PortalPriceBookRoute
   '/product/$id': typeof ProductIdRoute
   '/portal/': typeof PortalIndexRoute
 }
@@ -67,6 +88,9 @@ export interface FileRoutesByTo {
   '/catalog': typeof CatalogRoute
   '/samples': typeof SamplesRoute
   '/portal/catalog': typeof PortalCatalogRoute
+  '/portal/invoices': typeof PortalInvoicesRoute
+  '/portal/orders': typeof PortalOrdersRoute
+  '/portal/price-book': typeof PortalPriceBookRoute
   '/product/$id': typeof ProductIdRoute
   '/portal': typeof PortalIndexRoute
 }
@@ -77,6 +101,9 @@ export interface FileRoutesById {
   '/portal': typeof PortalRouteWithChildren
   '/samples': typeof SamplesRoute
   '/portal/catalog': typeof PortalCatalogRoute
+  '/portal/invoices': typeof PortalInvoicesRoute
+  '/portal/orders': typeof PortalOrdersRoute
+  '/portal/price-book': typeof PortalPriceBookRoute
   '/product/$id': typeof ProductIdRoute
   '/portal/': typeof PortalIndexRoute
 }
@@ -88,6 +115,9 @@ export interface FileRouteTypes {
     | '/portal'
     | '/samples'
     | '/portal/catalog'
+    | '/portal/invoices'
+    | '/portal/orders'
+    | '/portal/price-book'
     | '/product/$id'
     | '/portal/'
   fileRoutesByTo: FileRoutesByTo
@@ -96,6 +126,9 @@ export interface FileRouteTypes {
     | '/catalog'
     | '/samples'
     | '/portal/catalog'
+    | '/portal/invoices'
+    | '/portal/orders'
+    | '/portal/price-book'
     | '/product/$id'
     | '/portal'
   id:
@@ -105,6 +138,9 @@ export interface FileRouteTypes {
     | '/portal'
     | '/samples'
     | '/portal/catalog'
+    | '/portal/invoices'
+    | '/portal/orders'
+    | '/portal/price-book'
     | '/product/$id'
     | '/portal/'
   fileRoutesById: FileRoutesById
@@ -161,6 +197,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalCatalogRouteImport
       parentRoute: typeof PortalRoute
     }
+    '/portal/invoices': {
+      id: '/portal/invoices'
+      path: '/invoices'
+      fullPath: '/portal/invoices'
+      preLoaderRoute: typeof PortalInvoicesRouteImport
+      parentRoute: typeof PortalRoute
+    }
+    '/portal/orders': {
+      id: '/portal/orders'
+      path: '/orders'
+      fullPath: '/portal/orders'
+      preLoaderRoute: typeof PortalOrdersRouteImport
+      parentRoute: typeof PortalRoute
+    }
+    '/portal/price-book': {
+      id: '/portal/price-book'
+      path: '/price-book'
+      fullPath: '/portal/price-book'
+      preLoaderRoute: typeof PortalPriceBookRouteImport
+      parentRoute: typeof PortalRoute
+    }
     '/product/$id': {
       id: '/product/$id'
       path: '/product/$id'
@@ -173,11 +230,17 @@ declare module '@tanstack/react-router' {
 
 interface PortalRouteChildren {
   PortalCatalogRoute: typeof PortalCatalogRoute
+  PortalInvoicesRoute: typeof PortalInvoicesRoute
+  PortalOrdersRoute: typeof PortalOrdersRoute
+  PortalPriceBookRoute: typeof PortalPriceBookRoute
   PortalIndexRoute: typeof PortalIndexRoute
 }
 
 const PortalRouteChildren: PortalRouteChildren = {
   PortalCatalogRoute: PortalCatalogRoute,
+  PortalInvoicesRoute: PortalInvoicesRoute,
+  PortalOrdersRoute: PortalOrdersRoute,
+  PortalPriceBookRoute: PortalPriceBookRoute,
   PortalIndexRoute: PortalIndexRoute,
 }
 
