@@ -236,7 +236,9 @@ function Samples() {
         {/* Form */}
         <form onSubmit={submit} className="panel h-fit p-5 lg:sticky lg:top-[73px]">
           <h2 className="font-display text-lg font-semibold">Where should samples go?</h2>
-          <p className="spec-note mt-1">Prototype form — nothing is submitted or stored remotely.</p>
+          <p className="spec-note mt-1">
+            Prototype form — nothing is submitted or stored remotely.
+          </p>
 
           <div className="mt-5 space-y-4">
             {(

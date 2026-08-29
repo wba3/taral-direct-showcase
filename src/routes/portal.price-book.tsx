@@ -86,15 +86,11 @@ function PriceBook() {
             </div>
             <div>
               <dt className="label-caps text-muted-foreground">Price class {account.priceClass}</dt>
-              <dd className="text-muted-foreground">
-                Applies to every distributor in this class.
-              </dd>
+              <dd className="text-muted-foreground">Applies to every distributor in this class.</dd>
             </div>
             <div>
               <dt className="label-caps text-muted-foreground">Customer override</dt>
-              <dd className="text-muted-foreground">
-                Negotiated for {account.name} specifically.
-              </dd>
+              <dd className="text-muted-foreground">Negotiated for {account.name} specifically.</dd>
             </div>
           </dl>
         </div>

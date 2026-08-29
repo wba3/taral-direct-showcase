@@ -120,7 +120,10 @@ function Invoices() {
             </thead>
             <tbody>
               {visible.map((inv) => (
-                <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-secondary">
+                <tr
+                  key={inv.id}
+                  className="border-b border-border last:border-0 hover:bg-secondary"
+                >
                   <th scope="row" className="spec-note px-3 py-3 text-left text-foreground">
                     {inv.id}
                   </th>
@@ -257,9 +260,7 @@ function Invoices() {
           {payTarget && !receipt && (
             <>
               <DialogHeader>
-                <DialogTitle className="font-display">
-                  Demo payment · {payTarget.id}
-                </DialogTitle>
+                <DialogTitle className="font-display">Demo payment · {payTarget.id}</DialogTitle>
                 <DialogDescription>
                   This is a presentation of the payment step only. No card or bank fields are
                   collected, no credentials are requested, and no transaction is created.

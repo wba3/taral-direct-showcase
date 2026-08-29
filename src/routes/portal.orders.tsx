@@ -84,7 +84,10 @@ function Orders() {
           </thead>
           <tbody>
             {orders.map((order) => (
-              <tr key={order.id} className="border-b border-border last:border-0 hover:bg-secondary">
+              <tr
+                key={order.id}
+                className="border-b border-border last:border-0 hover:bg-secondary"
+              >
                 <th scope="row" className="spec-note px-3 py-3 text-left text-foreground">
                   {order.id}
                 </th>

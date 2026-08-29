@@ -13,8 +13,7 @@ export function ProductSilhouette({
   label?: string;
   className?: string;
 }) {
-  const wall =
-    category === "Double Wall Jars" ? 2 : category === "Thick Wall Jars" ? 1.4 : 0.8;
+  const wall = category === "Double Wall Jars" ? 2 : category === "Thick Wall Jars" ? 1.4 : 0.8;
 
   return (
     <svg

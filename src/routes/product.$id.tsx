@@ -18,7 +18,10 @@ export const Route = createFileRoute("/product/$id")({
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
-        meta: [{ title: "Item unavailable — Taral Direct" }, { name: "robots", content: "noindex" }],
+        meta: [
+          { title: "Item unavailable — Taral Direct" },
+          { name: "robots", content: "noindex" },
+        ],
       };
     }
     const { product } = loaderData;
