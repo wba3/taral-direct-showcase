@@ -12,7 +12,7 @@ import { useDemo } from "@/lib/demo-store";
 export const Route = createFileRoute("/catalog")({
   validateSearch: (
     search: Record<string, unknown>,
-  ): { q?: string; vol?: string; neck?: string; category?: string } => ({
+  ): { q?: string | undefined; vol?: string | undefined; neck?: string | undefined; category?: string | undefined } => ({
     q: typeof search["q"] === "string" ? (search["q"] as string) : undefined,
     vol: typeof search["vol"] === "string" ? (search["vol"] as string) : undefined,
     neck: typeof search["neck"] === "string" ? (search["neck"] as string) : undefined,
