@@ -10,33 +10,111 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CatalogRouteImport } from './routes/catalog'
+import { Route as PortalRouteImport } from './routes/portal'
+import { Route as SamplesRouteImport } from './routes/samples'
+import { Route as PortalIndexRouteImport } from './routes/portal.index'
+import { Route as PortalCatalogRouteImport } from './routes/portal.catalog'
+import { Route as ProductIdRouteImport } from './routes/product.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CatalogRoute = CatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalRoute = PortalRouteImport.update({
+  id: '/portal',
+  path: '/portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SamplesRoute = SamplesRouteImport.update({
+  id: '/samples',
+  path: '/samples',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalIndexRoute = PortalIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PortalRoute,
+} as any)
+const PortalCatalogRoute = PortalCatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
+  getParentRoute: () => PortalRoute,
+} as any)
+const ProductIdRoute = ProductIdRouteImport.update({
+  id: '/product/$id',
+  path: '/product/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/catalog': typeof CatalogRoute
+  '/portal': typeof PortalRouteWithChildren
+  '/samples': typeof SamplesRoute
+  '/portal/catalog': typeof PortalCatalogRoute
+  '/product/$id': typeof ProductIdRoute
+  '/portal/': typeof PortalIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/catalog': typeof CatalogRoute
+  '/samples': typeof SamplesRoute
+  '/portal/catalog': typeof PortalCatalogRoute
+  '/product/$id': typeof ProductIdRoute
+  '/portal': typeof PortalIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/catalog': typeof CatalogRoute
+  '/portal': typeof PortalRouteWithChildren
+  '/samples': typeof SamplesRoute
+  '/portal/catalog': typeof PortalCatalogRoute
+  '/product/$id': typeof ProductIdRoute
+  '/portal/': typeof PortalIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/catalog'
+    | '/portal'
+    | '/samples'
+    | '/portal/catalog'
+    | '/product/$id'
+    | '/portal/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/catalog'
+    | '/samples'
+    | '/portal/catalog'
+    | '/product/$id'
+    | '/portal'
+  id:
+    | '__root__'
+    | '/'
+    | '/catalog'
+    | '/portal'
+    | '/samples'
+    | '/portal/catalog'
+    | '/product/$id'
+    | '/portal/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CatalogRoute: typeof CatalogRoute
+  PortalRoute: typeof PortalRouteWithChildren
+  SamplesRoute: typeof SamplesRoute
+  ProductIdRoute: typeof ProductIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +126,70 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/catalog': {
+      id: '/catalog'
+      path: '/catalog'
+      fullPath: '/catalog'
+      preLoaderRoute: typeof CatalogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal': {
+      id: '/portal'
+      path: '/portal'
+      fullPath: '/portal'
+      preLoaderRoute: typeof PortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/samples': {
+      id: '/samples'
+      path: '/samples'
+      fullPath: '/samples'
+      preLoaderRoute: typeof SamplesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal/': {
+      id: '/portal/'
+      path: '/'
+      fullPath: '/portal/'
+      preLoaderRoute: typeof PortalIndexRouteImport
+      parentRoute: typeof PortalRoute
+    }
+    '/portal/catalog': {
+      id: '/portal/catalog'
+      path: '/catalog'
+      fullPath: '/portal/catalog'
+      preLoaderRoute: typeof PortalCatalogRouteImport
+      parentRoute: typeof PortalRoute
+    }
+    '/product/$id': {
+      id: '/product/$id'
+      path: '/product/$id'
+      fullPath: '/product/$id'
+      preLoaderRoute: typeof ProductIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface PortalRouteChildren {
+  PortalCatalogRoute: typeof PortalCatalogRoute
+  PortalIndexRoute: typeof PortalIndexRoute
+}
+
+const PortalRouteChildren: PortalRouteChildren = {
+  PortalCatalogRoute: PortalCatalogRoute,
+  PortalIndexRoute: PortalIndexRoute,
+}
+
+const PortalRouteWithChildren =
+  PortalRoute._addFileChildren(PortalRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CatalogRoute: CatalogRoute,
+  PortalRoute: PortalRouteWithChildren,
+  SamplesRoute: SamplesRoute,
+  ProductIdRoute: ProductIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
