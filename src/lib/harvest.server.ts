@@ -234,7 +234,7 @@ export async function runSiteHarvest(): Promise<HarvestSummary> {
       continue;
     }
     try {
-      const response = await fetch(url);
+      const response = await fetchImage(url);
       if (!response.ok) throw new Error(`download responded ${response.status}`);
       const contentType = response.headers.get("content-type") ?? "application/octet-stream";
       if (!contentType.startsWith("image/")) throw new Error(`unexpected type ${contentType}`);
