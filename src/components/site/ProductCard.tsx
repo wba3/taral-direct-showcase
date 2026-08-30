@@ -170,12 +170,15 @@ export function ProductCard({
 
   return (
     <article className="panel group flex flex-col">
-      <div className="rule-grid flex items-center justify-center border-b border-border py-8">
+      <div className="rule-grid relative flex items-center justify-center border-b border-border py-8">
         <ProductThumb
           product={product}
           className="size-28"
           silhouetteClassName="size-28 text-primary"
         />
+        <span className="absolute bottom-2 left-2">
+          <ProvenanceTag product={product} />
+        </span>
       </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
