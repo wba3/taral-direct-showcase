@@ -14,7 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      site_assets: {
+        Row: {
+          alt_text: string | null
+          byte_size: number | null
+          content_type: string | null
+          created_at: string
+          id: string
+          kind: string
+          public_url: string
+          source_page: string | null
+          source_url: string
+          storage_path: string
+          updated_at: string
+        }
+        Insert: {
+          alt_text?: string | null
+          byte_size?: number | null
+          content_type?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          public_url: string
+          source_page?: string | null
+          source_url: string
+          storage_path: string
+          updated_at?: string
+        }
+        Update: {
+          alt_text?: string | null
+          byte_size?: number | null
+          content_type?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          public_url?: string
+          source_page?: string | null
+          source_url?: string
+          storage_path?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      site_products: {
+        Row: {
+          category: string
+          created_at: string
+          diameter: string | null
+          id: string
+          label: string | null
+          material: string | null
+          source_image_url: string | null
+          source_key: string
+          source_page: string | null
+          style: string | null
+          updated_at: string
+          volume: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          diameter?: string | null
+          id?: string
+          label?: string | null
+          material?: string | null
+          source_image_url?: string | null
+          source_key: string
+          source_page?: string | null
+          style?: string | null
+          updated_at?: string
+          volume?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          diameter?: string | null
+          id?: string
+          label?: string | null
+          material?: string | null
+          source_image_url?: string | null
+          source_key?: string
+          source_page?: string | null
+          style?: string | null
+          updated_at?: string
+          volume?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
