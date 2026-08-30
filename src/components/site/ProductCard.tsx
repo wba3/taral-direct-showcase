@@ -4,6 +4,47 @@ import { money, type Product } from "@/data/products";
 import { ProductSilhouette } from "@/components/site/ProductSilhouette";
 import { DemoTag } from "@/components/site/DemoTag";
 import { cn } from "@/lib/utils";
+import { useProductImage } from "@/lib/site-images";
+
+/** Real photo harvested from taralplastics.com, with silhouette fallback. */
+function ProductThumb({
+  product,
+  className,
+  silhouetteClassName,
+}: {
+  product: Product;
+  className: string;
+  silhouetteClassName: string;
+}) {
+  const src = useProductImage(product);
+  if (!src) {
+    return (
+      <ProductSilhouette
+        category={product.category}
+        label={product.name}
+        className={silhouetteClassName}
+      />
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={`${product.name} — photograph from taralplastics.com`}
+      loading="lazy"
+      className={cn("object-contain", className)}
+    />
+  );
+}
+
+/** Labels whether the thumbnail is a real source photo or a drawn stand-in. */
+function ProvenanceTag({ product }: { product: Product }) {
+  const src = useProductImage(product);
+  return (
+    <DemoTag tone={src ? "neutral" : "illustrative"}>
+      {src ? "From taralplastics.com" : "Illustrative"}
+    </DemoTag>
+  );
+}
 
 function StockMark({ product }: { product: Product }) {
   const tone =
@@ -108,10 +149,10 @@ export function ProductCard({
     return (
       <article className="panel flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
         <div className="flex items-center gap-4 sm:w-72">
-          <ProductSilhouette
-            category={product.category}
-            label={product.name}
-            className="size-14 shrink-0 text-primary"
+          <ProductThumb
+            product={product}
+            className="size-14 shrink-0"
+            silhouetteClassName="size-14 shrink-0 text-primary"
           />
           <div className="min-w-0">
             <p className="spec-note text-foreground">{product.code}</p>
@@ -139,12 +180,15 @@ export function ProductCard({
 
   return (
     <article className="panel group flex flex-col">
-      <div className="rule-grid flex items-center justify-center border-b border-border py-8">
-        <ProductSilhouette
-          category={product.category}
-          label={product.name}
-          className="size-28 text-primary"
+      <div className="rule-grid relative flex items-center justify-center border-b border-border py-8">
+        <ProductThumb
+          product={product}
+          className="size-28"
+          silhouetteClassName="size-28 text-primary"
         />
+        <span className="absolute bottom-2 left-2">
+          <ProvenanceTag product={product} />
+        </span>
       </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>

@@ -7,6 +7,7 @@ import { ProductSilhouette } from "@/components/site/ProductSilhouette";
 import { PriceState } from "@/components/site/ProductCard";
 import { compatibleWith, getProduct, money } from "@/data/products";
 import { useDemo } from "@/lib/demo-store";
+import { useProductImage } from "@/lib/site-images";
 import detailImage from "@/assets/product-detail.jpg";
 
 export const Route = createFileRoute("/product/$id")({
@@ -42,6 +43,7 @@ export const Route = createFileRoute("/product/$id")({
 function ProductDetail() {
   const { product } = Route.useLoaderData();
   const { addSample } = useDemo();
+  const realImage = useProductImage(product);
   const matches = compatibleWith(product);
   const custom = product.demoUnitPrice === null && product.publicUnitPrice === null;
 
@@ -72,12 +74,16 @@ function ProductDetail() {
         <div className="lg:sticky lg:top-[73px] lg:self-start">
           <div className="border border-border">
             <img
-              src={detailImage}
-              alt={`${product.name} — representative container photograph`}
+              src={realImage ?? detailImage}
+              alt={`${product.name} — container photograph`}
               width={1200}
               height={1200}
               loading="lazy"
-              className="aspect-square w-full object-cover"
+              className={
+                realImage
+                  ? "aspect-square w-full bg-secondary object-contain p-8"
+                  : "aspect-square w-full object-cover"
+              }
             />
             <div className="flex items-center gap-4 border-t border-border p-4">
               <ProductSilhouette
@@ -85,10 +91,15 @@ function ProductDetail() {
                 label={product.name}
                 className="size-16 text-primary"
               />
-              <p className="spec-note">
-                Wall profile notation for {product.category.toLowerCase()}. Photography is
-                representative of the family, not the specific item.
-              </p>
+              <div>
+                <DemoTag tone="neutral">
+                  {realImage ? "From taralplastics.com" : "Representative photography"}
+                </DemoTag>
+                <p className="spec-note mt-1">
+                  Wall profile notation for {product.category.toLowerCase()}. Confirm exact
+                  dimensions against the drawing.
+                </p>
+              </div>
             </div>
           </div>
           <Button
