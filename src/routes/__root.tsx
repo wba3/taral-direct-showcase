@@ -151,6 +151,7 @@ function RootComponent() {
           <SiteFooter />
           <Toaster position="bottom-left" />
         </GuidedDemoProvider>
+        </SiteImageProvider>
       </DemoProvider>
     </QueryClientProvider>
   );
