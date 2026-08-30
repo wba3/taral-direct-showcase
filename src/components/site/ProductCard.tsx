@@ -36,6 +36,16 @@ function ProductThumb({
   );
 }
 
+/** Labels whether the thumbnail is a real source photo or a drawn stand-in. */
+function ProvenanceTag({ product }: { product: Product }) {
+  const src = useProductImage(product);
+  return (
+    <DemoTag tone={src ? "neutral" : "illustrative"}>
+      {src ? "From taralplastics.com" : "Illustrative"}
+    </DemoTag>
+  );
+}
+
 function StockMark({ product }: { product: Product }) {
   const tone =
     product.stock === "In stock"
