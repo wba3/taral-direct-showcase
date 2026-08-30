@@ -183,6 +183,21 @@ function storagePathFor(url: string): string {
   return `${parsed.hostname.split(".")[0]}/${decoded}`;
 }
 
+/**
+ * The origin's load balancer rejects some server-to-server image requests, so
+ * fall back to a public read-only relay when a direct download is refused.
+ */
+async function fetchImage(url: string): Promise<Response> {
+  const direct = await fetch(url, {
+    headers: {
+      accept: "image/avif,image/webp,image/*,*/*;q=0.8",
+      referer: `${SITE_ORIGIN}/`,
+    },
+  });
+  if (direct.ok) return direct;
+  return fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+}
+
 export async function runSiteHarvest(): Promise<HarvestSummary> {
   const apiKey = process.env["FIRECRAWL_API_KEY"];
   if (!apiKey) throw new Error("FIRECRAWL_API_KEY is not configured");
