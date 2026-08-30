@@ -4,6 +4,37 @@ import { money, type Product } from "@/data/products";
 import { ProductSilhouette } from "@/components/site/ProductSilhouette";
 import { DemoTag } from "@/components/site/DemoTag";
 import { cn } from "@/lib/utils";
+import { useProductImage } from "@/lib/site-images";
+
+/** Real photo harvested from taralplastics.com, with silhouette fallback. */
+function ProductThumb({
+  product,
+  className,
+  silhouetteClassName,
+}: {
+  product: Product;
+  className: string;
+  silhouetteClassName: string;
+}) {
+  const src = useProductImage(product);
+  if (!src) {
+    return (
+      <ProductSilhouette
+        category={product.category}
+        label={product.name}
+        className={silhouetteClassName}
+      />
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={`${product.name} — photograph from taralplastics.com`}
+      loading="lazy"
+      className={cn("object-contain", className)}
+    />
+  );
+}
 
 function StockMark({ product }: { product: Product }) {
   const tone =
