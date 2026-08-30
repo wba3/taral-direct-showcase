@@ -7,6 +7,7 @@ import { ProductSilhouette } from "@/components/site/ProductSilhouette";
 import { PriceState } from "@/components/site/ProductCard";
 import { compatibleWith, getProduct, money } from "@/data/products";
 import { useDemo } from "@/lib/demo-store";
+import { useProductImage } from "@/lib/site-images";
 import detailImage from "@/assets/product-detail.jpg";
 
 export const Route = createFileRoute("/product/$id")({
