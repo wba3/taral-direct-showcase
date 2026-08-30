@@ -26,7 +26,7 @@ export const Route = createFileRoute("/admin/assets")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: AssetLibrary;
+  component: AssetLibrary,
 });
 
 function AssetLibrary() {
