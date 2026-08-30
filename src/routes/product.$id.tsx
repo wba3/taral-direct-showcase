@@ -42,6 +42,7 @@ export const Route = createFileRoute("/product/$id")({
 function ProductDetail() {
   const { product } = Route.useLoaderData();
   const { addSample } = useDemo();
+  const realImage = useProductImage(product);
   const matches = compatibleWith(product);
   const custom = product.demoUnitPrice === null && product.publicUnitPrice === null;
 
