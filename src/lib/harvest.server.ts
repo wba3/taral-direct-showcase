@@ -41,7 +41,10 @@ interface ScrapedPage {
   html: string;
 }
 
-async function scrapePage(path: string, apiKey: string): Promise<{ markdown: string; html: string }> {
+async function scrapePage(
+  path: string,
+  apiKey: string,
+): Promise<{ markdown: string; html: string }> {
   const response = await fetch(`${FIRECRAWL_V2}/scrape`, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -142,7 +145,8 @@ export function parseProducts(page: ScrapedPage): ParsedSiteProduct[] {
     const window = block.slice(0, 900).replace(/\\\n/g, " ").replace(/\\/g, " ");
 
     const volume = /\*\*Volume:\*\*\s*([^*[\]\n]+?)\s{2,}/.exec(window)?.[1]?.trim() ?? null;
-    const diameter = /\*\*Diameter:\*\*\s*([^*[\]\n]+?)(?:\s{2,}|\])/.exec(window)?.[1]?.trim() ?? null;
+    const diameter =
+      /\*\*Diameter:\*\*\s*([^*[\]\n]+?)(?:\s{2,}|\])/.exec(window)?.[1]?.trim() ?? null;
     const style = /\*\*Style:\*\*\s*([^*[\]\n]+?)(?:\s{2,}|\])/.exec(window)?.[1]?.trim() ?? null;
     const bold = /\[\*\*([^*]+)\*\*\]/.exec(window)?.[1]?.trim() ?? null;
 
@@ -213,7 +217,9 @@ export async function runSiteHarvest(): Promise<HarvestSummary> {
       }
       products.push(...parseProducts(page));
     } catch (error) {
-      summary.errors.push(`${entry.path}: ${error instanceof Error ? error.message : String(error)}`);
+      summary.errors.push(
+        `${entry.path}: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 

@@ -135,22 +135,22 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <DemoProvider>
         <SiteImageProvider products={PRODUCTS}>
-        <GuidedDemoProvider>
-          <a
-            href="#main"
-            className="label-caps sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-sm focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground"
-          >
-            Skip to content
-          </a>
-          <PrototypeBanner />
-          <SiteHeader />
-          <main id="main">
-            {/* Required: nested routes render here. */}
-            <Outlet />
-          </main>
-          <SiteFooter />
-          <Toaster position="bottom-left" />
-        </GuidedDemoProvider>
+          <GuidedDemoProvider>
+            <a
+              href="#main"
+              className="label-caps sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-sm focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground"
+            >
+              Skip to content
+            </a>
+            <PrototypeBanner />
+            <SiteHeader />
+            <main id="main">
+              {/* Required: nested routes render here. */}
+              <Outlet />
+            </main>
+            <SiteFooter />
+            <Toaster position="bottom-left" />
+          </GuidedDemoProvider>
         </SiteImageProvider>
       </DemoProvider>
     </QueryClientProvider>

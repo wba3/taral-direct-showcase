@@ -7,6 +7,7 @@ of AI-generated stand-ins.
 ## What gets built
 
 **1. Backend (Lovable Cloud + Firecrawl)**
+
 - Enable Lovable Cloud: a public storage bucket for the harvested imagery plus a
   `site_assets` table that indexes every file (source page, original URL, stored path,
   kind: logo / category / product / other, alt text, width/height, checksum).
@@ -15,6 +16,7 @@ of AI-generated stand-ins.
 - Connect the Firecrawl connector for the crawl.
 
 **2. Harvest step (admin-triggered, run once)**
+
 - A protected server function maps taralplastics.com, then scrapes the category pages
   (Regular Wall, Thick Wall, Double Wall, Lids & Closures, Discs & Dust Covers, Add-Ons,
   Big Packaging) plus home/about/contact.
@@ -25,11 +27,13 @@ of AI-generated stand-ins.
 - Product rows parsed from the same pages land in `scraped_products`.
 
 **3. Admin harvest screen**
+
 - A small `/admin/assets` page: "Run harvest" button, live counts, and a gallery of every
   stored asset with its source URL, so you can see exactly what came down and confirm
   nothing is missing before the meeting.
 
 **4. Wire the real assets into the prototype**
+
 - Catalog cards, product detail pages, category rails, and the home hero read their
   imagery from `site_assets` (matched by category, then by item code where available),
   falling back to the existing generated images when no real photo exists.
@@ -37,6 +41,7 @@ of AI-generated stand-ins.
 - Generated `hero-jars.jpg` / `product-detail.jpg` stay as fallbacks only.
 
 **5. Labeling**
+
 - Real imagery and real product data get a `From taralplastics.com` provenance tag,
   alongside the existing `Illustrative` / `Demo data` tags.
 - Pricing, inventory, orders, invoices, and the price book stay labeled demo/illustrative —

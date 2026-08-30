@@ -51,7 +51,11 @@ function resolve(index: SiteAssetIndex | undefined, products: Product[]): Resolv
   const byCategory = new Map<string, string>();
   for (const asset of index.assets) {
     if (asset.kind !== "category") continue;
-    const slug = asset.sourceUrl.split("/").pop()?.replace(/\.[a-z]+$/i, "") ?? "";
+    const slug =
+      asset.sourceUrl
+        .split("/")
+        .pop()
+        ?.replace(/\.[a-z]+$/i, "") ?? "";
     const category = CATEGORY_TILE[slug];
     if (category) byCategory.set(category, asset.publicUrl);
   }
