@@ -171,10 +171,10 @@ export function ProductCard({
   return (
     <article className="panel group flex flex-col">
       <div className="rule-grid flex items-center justify-center border-b border-border py-8">
-        <ProductSilhouette
-          category={product.category}
-          label={product.name}
-          className="size-28 text-primary"
+        <ProductThumb
+          product={product}
+          className="size-28"
+          silhouetteClassName="size-28 text-primary"
         />
       </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
