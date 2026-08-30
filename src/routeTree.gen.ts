@@ -21,6 +21,7 @@ import { Route as PortalInvoicesRouteImport } from './routes/portal.invoices'
 import { Route as PortalOrdersRouteImport } from './routes/portal.orders'
 import { Route as PortalPriceBookRouteImport } from './routes/portal.price-book'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as ApiPublicSiteAssetSplatRouteImport } from './routes/api/public/site-asset.$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -82,6 +83,11 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSiteAssetSplatRoute = ApiPublicSiteAssetSplatRouteImport.update({
+  id: '/api/public/site-asset/$',
+  path: '/api/public/site-asset/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/portal/price-book': typeof PortalPriceBookRoute
   '/product/$id': typeof ProductIdRoute
   '/portal/': typeof PortalIndexRoute
+  '/api/public/site-asset/$': typeof ApiPublicSiteAssetSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/portal/price-book': typeof PortalPriceBookRoute
   '/product/$id': typeof ProductIdRoute
   '/portal': typeof PortalIndexRoute
+  '/api/public/site-asset/$': typeof ApiPublicSiteAssetSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/portal/price-book': typeof PortalPriceBookRoute
   '/product/$id': typeof ProductIdRoute
   '/portal/': typeof PortalIndexRoute
+  '/api/public/site-asset/$': typeof ApiPublicSiteAssetSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/portal/price-book'
     | '/product/$id'
     | '/portal/'
+    | '/api/public/site-asset/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/portal/price-book'
     | '/product/$id'
     | '/portal'
+    | '/api/public/site-asset/$'
   id:
     | '__root__'
     | '/'
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/portal/price-book'
     | '/product/$id'
     | '/portal/'
+    | '/api/public/site-asset/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -176,6 +188,7 @@ export interface RootRouteChildren {
   PortalRoute: typeof PortalRouteWithChildren
   SamplesRoute: typeof SamplesRoute
   ProductIdRoute: typeof ProductIdRoute
+  ApiPublicSiteAssetSplatRoute: typeof ApiPublicSiteAssetSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -264,6 +277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/site-asset/$': {
+      id: '/api/public/site-asset/$'
+      path: '/api/public/site-asset/$'
+      fullPath: '/api/public/site-asset/$'
+      preLoaderRoute: typeof ApiPublicSiteAssetSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -295,6 +315,7 @@ const rootRouteChildren: RootRouteChildren = {
   PortalRoute: PortalRouteWithChildren,
   SamplesRoute: SamplesRoute,
   ProductIdRoute: ProductIdRoute,
+  ApiPublicSiteAssetSplatRoute: ApiPublicSiteAssetSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
