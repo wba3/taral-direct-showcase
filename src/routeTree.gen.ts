@@ -14,6 +14,7 @@ import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as IntegrationRouteImport } from './routes/integration'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as SamplesRouteImport } from './routes/samples'
+import { Route as AdminAssetsRouteImport } from './routes/admin.assets'
 import { Route as PortalIndexRouteImport } from './routes/portal.index'
 import { Route as PortalAccountRouteImport } from './routes/portal.account'
 import { Route as PortalCatalogRouteImport } from './routes/portal.catalog'
@@ -46,6 +47,11 @@ const PortalRoute = PortalRouteImport.update({
 const SamplesRoute = SamplesRouteImport.update({
   id: '/samples',
   path: '/samples',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAssetsRoute = AdminAssetsRouteImport.update({
+  id: '/admin/assets',
+  path: '/admin/assets',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PortalIndexRoute = PortalIndexRouteImport.update({
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/integration': typeof IntegrationRoute
   '/portal': typeof PortalRouteWithChildren
   '/samples': typeof SamplesRoute
+  '/admin/assets': typeof AdminAssetsRoute
   '/portal/account': typeof PortalAccountRoute
   '/portal/catalog': typeof PortalCatalogRoute
   '/portal/invoices': typeof PortalInvoicesRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/catalog': typeof CatalogRoute
   '/integration': typeof IntegrationRoute
   '/samples': typeof SamplesRoute
+  '/admin/assets': typeof AdminAssetsRoute
   '/portal/account': typeof PortalAccountRoute
   '/portal/catalog': typeof PortalCatalogRoute
   '/portal/invoices': typeof PortalInvoicesRoute
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/integration': typeof IntegrationRoute
   '/portal': typeof PortalRouteWithChildren
   '/samples': typeof SamplesRoute
+  '/admin/assets': typeof AdminAssetsRoute
   '/portal/account': typeof PortalAccountRoute
   '/portal/catalog': typeof PortalCatalogRoute
   '/portal/invoices': typeof PortalInvoicesRoute
@@ -142,6 +151,7 @@ export interface FileRouteTypes {
     | '/integration'
     | '/portal'
     | '/samples'
+    | '/admin/assets'
     | '/portal/account'
     | '/portal/catalog'
     | '/portal/invoices'
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/catalog'
     | '/integration'
     | '/samples'
+    | '/admin/assets'
     | '/portal/account'
     | '/portal/catalog'
     | '/portal/invoices'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/integration'
     | '/portal'
     | '/samples'
+    | '/admin/assets'
     | '/portal/account'
     | '/portal/catalog'
     | '/portal/invoices'
@@ -187,6 +199,7 @@ export interface RootRouteChildren {
   IntegrationRoute: typeof IntegrationRoute
   PortalRoute: typeof PortalRouteWithChildren
   SamplesRoute: typeof SamplesRoute
+  AdminAssetsRoute: typeof AdminAssetsRoute
   ProductIdRoute: typeof ProductIdRoute
   ApiPublicSiteAssetSplatRoute: typeof ApiPublicSiteAssetSplatRoute
 }
@@ -226,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/samples'
       fullPath: '/samples'
       preLoaderRoute: typeof SamplesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/assets': {
+      id: '/admin/assets'
+      path: '/admin/assets'
+      fullPath: '/admin/assets'
+      preLoaderRoute: typeof AdminAssetsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/portal/': {
@@ -314,6 +334,7 @@ const rootRouteChildren: RootRouteChildren = {
   IntegrationRoute: IntegrationRoute,
   PortalRoute: PortalRouteWithChildren,
   SamplesRoute: SamplesRoute,
+  AdminAssetsRoute: AdminAssetsRoute,
   ProductIdRoute: ProductIdRoute,
   ApiPublicSiteAssetSplatRoute: ApiPublicSiteAssetSplatRoute,
 }
