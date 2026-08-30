@@ -139,10 +139,10 @@ export function ProductCard({
     return (
       <article className="panel flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
         <div className="flex items-center gap-4 sm:w-72">
-          <ProductSilhouette
-            category={product.category}
-            label={product.name}
-            className="size-14 shrink-0 text-primary"
+          <ProductThumb
+            product={product}
+            className="size-14 shrink-0"
+            silhouetteClassName="size-14 shrink-0 text-primary"
           />
           <div className="min-w-0">
             <p className="spec-note text-foreground">{product.code}</p>
