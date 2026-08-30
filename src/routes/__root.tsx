@@ -14,6 +14,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { DemoProvider } from "@/lib/demo-store";
 import { GuidedDemoProvider } from "@/lib/guided-demo";
 import { PrototypeBanner, SiteFooter, SiteHeader } from "@/components/site/Chrome";
+import { SiteImageProvider } from "@/lib/site-images";
+import { PRODUCTS } from "@/data/products";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
