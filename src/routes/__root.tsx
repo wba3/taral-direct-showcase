@@ -134,6 +134,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <DemoProvider>
+        <SiteImageProvider products={PRODUCTS}>
         <GuidedDemoProvider>
           <a
             href="#main"
