@@ -1,11 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { AlertTriangle, Download, FileText, Info, PackageSearch, RotateCcw } from "lucide-react";
+import { AlertTriangle, FileText, Info, PackageSearch, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { DemoTag } from "@/components/site/DemoTag";
-import { useDemo } from "@/lib/demo-store";
-import { ACCOUNT, getAccount } from "@/data/portal";
+import { usePortalView, orderProgress } from "@/lib/portal-view";
 import { money } from "@/data/products";
 
 export const Route = createFileRoute("/portal/")({
@@ -13,19 +12,34 @@ export const Route = createFileRoute("/portal/")({
 });
 
 function Overview() {
-  const { accountId, orders, reorder } = useDemo();
+  const { account, orders, reorder, invoices, totals, asOf, role } = usePortalView();
   const navigate = useNavigate();
-  const account = getAccount(accountId) ?? ACCOUNT;
-  const lastOrder = orders[orders.length - 1];
+  const lastOrder = orders[0];
+
+  if (!account) return null;
 
   const metrics = [
-    { label: "Open orders", value: String(account.openOrders), to: "/portal/orders" as const },
     {
-      label: "Open invoices",
-      value: money(account.openInvoiceTotal, 0),
+      label: "Open orders",
+      value: String(totals.openOrders),
+      note: `${money(totals.openOrderValue, 0)} in open order value`,
+      to: "/portal/orders" as const,
+    },
+    {
+      label: "Outstanding balance",
+      value: money(totals.outstanding, 0),
+      note:
+        totals.pending > 0
+          ? `${money(totals.pending, 0)} received, posting pending`
+          : `${invoices.filter((v) => v.outstanding > 0).length} invoice(s) open`,
       to: "/portal/invoices" as const,
     },
-    { label: "Next payment due", value: account.nextPaymentDue, to: "/portal/invoices" as const },
+    {
+      label: "Next payment due",
+      value: totals.nextDue ?? "Nothing due",
+      note: totals.overdue > 0 ? `${money(totals.overdue, 0)} past due` : "No past-due balance",
+      to: "/portal/invoices" as const,
+    },
   ];
 
   return (
@@ -36,45 +50,46 @@ function Overview() {
         <div>
           <h2 className="label-caps text-muted-foreground">Fast actions</h2>
           <div className="mt-3 flex flex-col gap-2">
-            <Button
-              variant="outline"
-              className="justify-start"
-              onClick={() => {
-                if (!lastOrder) return;
-                reorder(lastOrder);
-                toast.success(`Reordered ${lastOrder.id}`, {
-                  description: "Lines added to your demo order draft.",
-                });
-                navigate({ to: "/portal/catalog" });
-              }}
-            >
-              <RotateCcw className="size-4" /> Reorder last order
-            </Button>
-            <Button variant="outline" className="justify-start" asChild>
-              <Link to="/portal/catalog">
-                <PackageSearch className="size-4" /> Browse private catalog
-              </Link>
-            </Button>
-            <Button
-              variant="outline"
-              className="justify-start"
-              onClick={() =>
-                toast.info("Simulated download", {
-                  description: "A CSV of your price book would download here.",
-                })
-              }
-            >
-              <Download className="size-4" /> Download price book
-            </Button>
+            {role === "buyer" && (
+              <>
+                <Button
+                  variant="outline"
+                  className="justify-start"
+                  disabled={!lastOrder}
+                  onClick={() => {
+                    if (!lastOrder) return;
+                    const result = reorder(lastOrder);
+                    toast.success(`Reordered ${lastOrder.id}`, {
+                      description: `${result.added} line(s) added${
+                        result.repriced > 0
+                          ? `, ${result.repriced} repriced at today's contract price`
+                          : ""
+                      }.`,
+                    });
+                    navigate({ to: "/portal/catalog" });
+                  }}
+                >
+                  <RotateCcw className="size-4" /> Reorder {lastOrder?.id ?? "last order"}
+                </Button>
+                <Button variant="outline" className="justify-start" asChild>
+                  <Link to="/portal/catalog">
+                    <PackageSearch className="size-4" /> Place an order
+                  </Link>
+                </Button>
+              </>
+            )}
             <Button variant="outline" className="justify-start" asChild>
               <Link to="/portal/invoices">
                 <FileText className="size-4" /> View invoices
               </Link>
             </Button>
+            <Button variant="outline" className="justify-start" asChild>
+              <Link to="/portal/price-book">Your price book</Link>
+            </Button>
           </div>
           <p className="spec-note mt-6">
-            Data as of {account.asOf}. In production this timestamp reflects the last successful
-            Acumatica read.
+            Data as of {asOf}. In the live service this timestamp is the last successful read from
+            Taral's business system.
           </p>
         </div>
       }
@@ -85,6 +100,7 @@ function Overview() {
             <div key={m.label} className="bg-card p-5">
               <dt className="label-caps text-muted-foreground">{m.label}</dt>
               <dd className="tabular mt-2 font-display text-2xl font-bold">{m.value}</dd>
+              <p className="spec-note mt-1">{m.note}</p>
               <div className="mt-3 flex items-center gap-2">
                 <DemoTag>Demo data</DemoTag>
                 <Link to={m.to} className="label-caps text-primary hover:underline">
@@ -111,21 +127,12 @@ function Overview() {
               <p className="text-sm">
                 {alert.text} <DemoTag className="ml-1" />
               </p>
-              {alert.tone === "action" ? (
-                <Link
-                  to="/portal/orders"
-                  className="label-caps ml-auto shrink-0 text-primary hover:underline"
-                >
-                  Review
-                </Link>
-              ) : (
-                <Link
-                  to="/portal/price-book"
-                  className="label-caps ml-auto shrink-0 text-primary hover:underline"
-                >
-                  Price book
-                </Link>
-              )}
+              <Link
+                to={alert.tone === "action" ? "/portal/orders" : "/portal/price-book"}
+                className="label-caps ml-auto shrink-0 text-primary hover:underline"
+              >
+                {alert.tone === "action" ? "Review" : "Price book"}
+              </Link>
             </li>
           ))}
         </ul>
@@ -140,23 +147,35 @@ function Overview() {
             All orders
           </Link>
         </div>
-        <ul className="mt-3 divide-y divide-border border-y border-border">
-          {orders.slice(0, 3).map((order) => (
-            <li key={order.id} className="flex flex-wrap items-baseline gap-x-6 gap-y-1 py-3">
-              <span className="spec-note text-foreground">{order.id}</span>
-              <span className="text-sm">PO {order.po}</span>
-              <span className="spec-note">{order.date}</span>
-              <span className="label-caps text-accent">{order.status}</span>
-              <Link
-                to="/portal/orders"
-                search={{ order: order.id }}
-                className="label-caps ml-auto text-primary hover:underline"
-              >
-                Detail
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {orders.length === 0 ? (
+          <p className="mt-3 border-y border-border py-6 text-sm text-muted-foreground">
+            No orders on this account yet.
+          </p>
+        ) : (
+          <ul className="mt-3 divide-y divide-border border-y border-border">
+            {orders.slice(0, 3).map((order) => {
+              const p = orderProgress(order);
+              return (
+                <li key={order.id} className="flex flex-wrap items-baseline gap-x-6 gap-y-1 py-3">
+                  <span className="spec-note text-foreground">{order.id}</span>
+                  <span className="text-sm">PO {order.po}</span>
+                  <span className="spec-note">{order.date}</span>
+                  <span className="label-caps text-accent">{order.status}</span>
+                  <span className="spec-note tabular">
+                    {p.shipped} of {p.requested} cases shipped
+                  </span>
+                  <Link
+                    to="/portal/orders"
+                    search={{ order: order.id }}
+                    className="label-caps ml-auto text-primary hover:underline"
+                  >
+                    Detail
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
     </PortalShell>
   );
