@@ -124,11 +124,12 @@ function Faq() {
             <Button variant="outline" asChild>
               <Link to="/samples">Request samples</Link>
             </Button>
-            <Button variant="rail" asChild>
+            <Button variant="rail" className="h-auto whitespace-normal py-2 text-center" asChild>
               <a href="https://taralplastics.com/" rel="noreferrer" target="_blank">
                 Pricing and terms on taralplastics.com
               </a>
             </Button>
+
           </div>
         </aside>
       </div>
