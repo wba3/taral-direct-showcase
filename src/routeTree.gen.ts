@@ -23,8 +23,10 @@ import { Route as PortalIndexRouteImport } from './routes/portal.index'
 import { Route as PortalAccountRouteImport } from './routes/portal.account'
 import { Route as PortalCatalogRouteImport } from './routes/portal.catalog'
 import { Route as PortalInvoicesRouteImport } from './routes/portal.invoices'
+import { Route as PortalOperationsRouteImport } from './routes/portal.operations'
 import { Route as PortalOrdersRouteImport } from './routes/portal.orders'
 import { Route as PortalPriceBookRouteImport } from './routes/portal.price-book'
+import { Route as PortalSamplesRouteImport } from './routes/portal.samples'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as ApiPublicSiteAssetSplatRouteImport } from './routes/api/public/site-asset.$'
 
@@ -98,6 +100,11 @@ const PortalInvoicesRoute = PortalInvoicesRouteImport.update({
   path: '/invoices',
   getParentRoute: () => PortalRoute,
 } as any)
+const PortalOperationsRoute = PortalOperationsRouteImport.update({
+  id: '/operations',
+  path: '/operations',
+  getParentRoute: () => PortalRoute,
+} as any)
 const PortalOrdersRoute = PortalOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -106,6 +113,11 @@ const PortalOrdersRoute = PortalOrdersRouteImport.update({
 const PortalPriceBookRoute = PortalPriceBookRouteImport.update({
   id: '/price-book',
   path: '/price-book',
+  getParentRoute: () => PortalRoute,
+} as any)
+const PortalSamplesRoute = PortalSamplesRouteImport.update({
+  id: '/samples',
+  path: '/samples',
   getParentRoute: () => PortalRoute,
 } as any)
 const ProductIdRoute = ProductIdRouteImport.update({
@@ -133,8 +145,10 @@ export interface FileRoutesByFullPath {
   '/portal/account': typeof PortalAccountRoute
   '/portal/catalog': typeof PortalCatalogRoute
   '/portal/invoices': typeof PortalInvoicesRoute
+  '/portal/operations': typeof PortalOperationsRoute
   '/portal/orders': typeof PortalOrdersRoute
   '/portal/price-book': typeof PortalPriceBookRoute
+  '/portal/samples': typeof PortalSamplesRoute
   '/product/$id': typeof ProductIdRoute
   '/portal/': typeof PortalIndexRoute
   '/api/public/site-asset/$': typeof ApiPublicSiteAssetSplatRoute
@@ -152,8 +166,10 @@ export interface FileRoutesByTo {
   '/portal/account': typeof PortalAccountRoute
   '/portal/catalog': typeof PortalCatalogRoute
   '/portal/invoices': typeof PortalInvoicesRoute
+  '/portal/operations': typeof PortalOperationsRoute
   '/portal/orders': typeof PortalOrdersRoute
   '/portal/price-book': typeof PortalPriceBookRoute
+  '/portal/samples': typeof PortalSamplesRoute
   '/product/$id': typeof ProductIdRoute
   '/portal': typeof PortalIndexRoute
   '/api/public/site-asset/$': typeof ApiPublicSiteAssetSplatRoute
@@ -173,8 +189,10 @@ export interface FileRoutesById {
   '/portal/account': typeof PortalAccountRoute
   '/portal/catalog': typeof PortalCatalogRoute
   '/portal/invoices': typeof PortalInvoicesRoute
+  '/portal/operations': typeof PortalOperationsRoute
   '/portal/orders': typeof PortalOrdersRoute
   '/portal/price-book': typeof PortalPriceBookRoute
+  '/portal/samples': typeof PortalSamplesRoute
   '/product/$id': typeof ProductIdRoute
   '/portal/': typeof PortalIndexRoute
   '/api/public/site-asset/$': typeof ApiPublicSiteAssetSplatRoute
@@ -195,8 +213,10 @@ export interface FileRouteTypes {
     | '/portal/account'
     | '/portal/catalog'
     | '/portal/invoices'
+    | '/portal/operations'
     | '/portal/orders'
     | '/portal/price-book'
+    | '/portal/samples'
     | '/product/$id'
     | '/portal/'
     | '/api/public/site-asset/$'
@@ -214,8 +234,10 @@ export interface FileRouteTypes {
     | '/portal/account'
     | '/portal/catalog'
     | '/portal/invoices'
+    | '/portal/operations'
     | '/portal/orders'
     | '/portal/price-book'
+    | '/portal/samples'
     | '/product/$id'
     | '/portal'
     | '/api/public/site-asset/$'
@@ -234,8 +256,10 @@ export interface FileRouteTypes {
     | '/portal/account'
     | '/portal/catalog'
     | '/portal/invoices'
+    | '/portal/operations'
     | '/portal/orders'
     | '/portal/price-book'
+    | '/portal/samples'
     | '/product/$id'
     | '/portal/'
     | '/api/public/site-asset/$'
@@ -356,6 +380,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalInvoicesRouteImport
       parentRoute: typeof PortalRoute
     }
+    '/portal/operations': {
+      id: '/portal/operations'
+      path: '/operations'
+      fullPath: '/portal/operations'
+      preLoaderRoute: typeof PortalOperationsRouteImport
+      parentRoute: typeof PortalRoute
+    }
     '/portal/orders': {
       id: '/portal/orders'
       path: '/orders'
@@ -368,6 +399,13 @@ declare module '@tanstack/react-router' {
       path: '/price-book'
       fullPath: '/portal/price-book'
       preLoaderRoute: typeof PortalPriceBookRouteImport
+      parentRoute: typeof PortalRoute
+    }
+    '/portal/samples': {
+      id: '/portal/samples'
+      path: '/samples'
+      fullPath: '/portal/samples'
+      preLoaderRoute: typeof PortalSamplesRouteImport
       parentRoute: typeof PortalRoute
     }
     '/product/$id': {
@@ -391,8 +429,10 @@ interface PortalRouteChildren {
   PortalAccountRoute: typeof PortalAccountRoute
   PortalCatalogRoute: typeof PortalCatalogRoute
   PortalInvoicesRoute: typeof PortalInvoicesRoute
+  PortalOperationsRoute: typeof PortalOperationsRoute
   PortalOrdersRoute: typeof PortalOrdersRoute
   PortalPriceBookRoute: typeof PortalPriceBookRoute
+  PortalSamplesRoute: typeof PortalSamplesRoute
   PortalIndexRoute: typeof PortalIndexRoute
 }
 
@@ -400,8 +440,10 @@ const PortalRouteChildren: PortalRouteChildren = {
   PortalAccountRoute: PortalAccountRoute,
   PortalCatalogRoute: PortalCatalogRoute,
   PortalInvoicesRoute: PortalInvoicesRoute,
+  PortalOperationsRoute: PortalOperationsRoute,
   PortalOrdersRoute: PortalOrdersRoute,
   PortalPriceBookRoute: PortalPriceBookRoute,
+  PortalSamplesRoute: PortalSamplesRoute,
   PortalIndexRoute: PortalIndexRoute,
 }
 

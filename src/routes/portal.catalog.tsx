@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,8 +14,9 @@ import {
   type FilterState,
 } from "@/components/site/CatalogFilters";
 import { PRODUCTS, money } from "@/data/products";
-import { ACCOUNT, getAccount } from "@/data/portal";
-import { useDemo } from "@/lib/demo-store";
+import { resolvePrice } from "@/data/portal";
+import { newReference, wholeQty } from "@/lib/demo-store";
+import { availabilityFor, usePortalView } from "@/lib/portal-view";
 import { services } from "@/lib/adapters/mock";
 
 export const Route = createFileRoute("/portal/catalog")({
@@ -23,9 +24,18 @@ export const Route = createFileRoute("/portal/catalog")({
 });
 
 function PrivateCatalog() {
-  const { accountId, draft, addDraftLine, updateDraft, removeDraft, clearDraft, placeDraftOrder } =
-    useDemo();
-  const account = getAccount(accountId) ?? ACCOUNT;
+  const {
+    account,
+    accountId,
+    draft,
+    addDraftLine,
+    updateDraft,
+    removeDraft,
+    clearDraft,
+    placeDraftOrder,
+    simulateStaleInventory,
+    asOf,
+  } = usePortalView();
   const [filters, setFilters] = useState<FilterState>({
     q: "",
     category: "any",
@@ -35,37 +45,62 @@ function PrivateCatalog() {
     stock: "any",
   });
   const [po, setPo] = useState("");
-  const [revalidation, setRevalidation] = useState<string | null>(null);
+  const [review, setReview] = useState<{ ok: boolean; message: string } | null>(null);
+  const [idemKey, setIdemKey] = useState(() => newReference("IDEMP"));
 
   const results = useCatalogFilter(PRODUCTS, filters);
-  const draftTotal = draft.reduce((sum, l) => sum + l.cases * l.eachPerCase * l.unitPrice, 0);
+  const priced = draft.filter((l) => l.unitPrice != null);
+  const draftTotal = priced.reduce((sum, l) => sum + l.cases * l.eachPerCase * (l.unitPrice ?? 0), 0);
+  const unpriced = draft.length - priced.length;
 
-  const review = async () => {
+  if (!account) {
+    return (
+      <PortalShell account={null} title="Order">
+        <p className="text-sm text-muted-foreground">
+          Choose a demo account in Demo controls to place an order.
+        </p>
+      </PortalShell>
+    );
+  }
+
+  const revalidate = async () => {
     const res = await services.erp.revalidateCart(
       account.id,
       draft.map((l) => ({ productId: l.productId, cases: l.cases })),
     );
-    setRevalidation(res.data.message);
+    setReview({ ok: res.data.ok, message: res.data.message });
   };
 
   const submit = () => {
-    const order = placeDraftOrder(po);
-    setRevalidation(null);
-    setPo("");
-    if (order)
-      toast.success(`Demo order ${order.id} created`, {
-        description: "Stored locally only. No order was written to any system.",
+    const res = placeDraftOrder(po, idemKey);
+    if (res.duplicate) {
+      toast.info("Already submitted", {
+        description: `This draft was already submitted as ${res.order?.id}.`,
       });
+      return;
+    }
+    if (!res.ok || !res.order) {
+      toast.error("Order not submitted", { description: res.errors.join(" ") });
+      setReview({ ok: false, message: res.errors.join(" ") });
+      return;
+    }
+    setReview(null);
+    setPo("");
+    setIdemKey(newReference("IDEMP"));
+    toast.success(`Demo order ${res.order.id} created`, {
+      description: "Saved in this browser only. No order was written to any system.",
+    });
   };
 
   return (
     <PortalShell
       account={account}
-      title="Private catalog"
+      title="Order"
       intro={
         <p className="measure text-sm text-muted-foreground">
-          Your price sits beside the public list price. Quantity breaks, case counts, and
-          available-to-sell reflect the demo data set as of {account.asOf}.
+          Your contract price sits beside the public list price. Quantity breaks, case counts and
+          availability reflect the demo data as of {asOf}. Orders are whole cases, minimum{" "}
+          {account.caseMinimum} case per line. {account.smallOrderFee}.
         </p>
       }
       rail={
@@ -73,7 +108,8 @@ function PrivateCatalog() {
           <h2 className="label-caps text-muted-foreground">Demo order draft</h2>
           {draft.length === 0 ? (
             <p className="spec-note mt-3">
-              Nothing added. Stocked items can be added directly; custom programs route to a quote.
+              Nothing added. Stocked items can be added directly; items without a current price for
+              this account route to customer service for a quote.
             </p>
           ) : (
             <>
@@ -92,13 +128,18 @@ function PrivateCatalog() {
                       <Input
                         id={`cases-${line.productId}`}
                         type="number"
-                        min={1}
+                        min={account.caseMinimum}
+                        step={1}
                         value={line.cases}
-                        onChange={(e) => updateDraft(line.productId, Number(e.target.value) || 1)}
+                        onChange={(e) =>
+                          updateDraft(line.productId, wholeQty(e.target.value, account.caseMinimum, 9999))
+                        }
                         className="tabular h-8 w-20 rounded-sm"
                       />
                       <span className="spec-note ml-auto">
-                        {money(line.cases * line.eachPerCase * line.unitPrice)}
+                        {line.unitPrice == null
+                          ? "Quote"
+                          : money(line.cases * line.eachPerCase * line.unitPrice, 2)}
                       </span>
                       <button
                         onClick={() => removeDraft(line.productId)}
@@ -108,13 +149,24 @@ function PrivateCatalog() {
                         <Trash2 className="size-4" />
                       </button>
                     </div>
+                    <p className="spec-note mt-1">
+                      {line.unitPrice == null
+                        ? "No current price for this account — customer service will quote it."
+                        : `${money(line.unitPrice, 3)} / item · ${line.priceBasis} · effective ${line.priceEffective}`}
+                    </p>
                   </li>
                 ))}
               </ul>
               <p className="tabular mt-3 flex items-baseline justify-between">
                 <span className="label-caps text-muted-foreground">Draft total</span>
-                <span className="font-display text-lg font-semibold">{money(draftTotal)}</span>
+                <span className="font-display text-lg font-semibold">{money(draftTotal, 2)}</span>
               </p>
+              {unpriced > 0 && (
+                <p className="spec-note text-accent">
+                  {unpriced} line(s) awaiting a quote are excluded from the total and block
+                  submission.
+                </p>
+              )}
               <DemoTag tone="illustrative" className="mt-2" />
 
               <div className="mt-4 space-y-2">
@@ -128,12 +180,24 @@ function PrivateCatalog() {
                   placeholder="ML-PO-88240"
                   className="rounded-sm"
                 />
-                <Button variant="outline" className="w-full" onClick={review}>
-                  Review & revalidate
+                <Button variant="outline" className="w-full" onClick={revalidate}>
+                  Review price &amp; availability
                 </Button>
-                {revalidation && (
-                  <p className="border border-border bg-secondary p-3 text-sm text-muted-foreground">
-                    {revalidation}
+                {review && (
+                  <p
+                    className={`border p-3 text-sm ${
+                      review.ok
+                        ? "border-border bg-secondary text-muted-foreground"
+                        : "border-destructive/40 bg-destructive/5"
+                    }`}
+                  >
+                    {!review.ok && (
+                      <AlertTriangle
+                        className="mr-1 inline size-4 align-[-2px] text-destructive"
+                        aria-hidden="true"
+                      />
+                    )}
+                    {review.message}
                   </p>
                 )}
                 <Button variant="accent" className="w-full" onClick={submit}>
@@ -148,56 +212,77 @@ function PrivateCatalog() {
         </div>
       }
     >
-      <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
+      <div data-demo-target="portal-catalog" className="grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]">
         <CatalogFilters filters={filters} onChange={setFilters} products={PRODUCTS} />
         <div className="min-w-0">
           <p className="spec-note border-b border-border pb-3">
-            {results.length} items · UOM CASE · prices per item
+            {results.length} items · UOM CASE · prices per item · as of {asOf}
           </p>
           <div className="mt-4 flex flex-col gap-3">
-            {results.map((product) => (
-              <div key={product.id}>
-                <ProductCard
-                  product={product}
-                  view="list"
-                  mode="portal"
-                  action={
-                    product.demoUnitPrice === null ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          toast.info("Quote request (prototype)", {
-                            description: `${product.code} is a custom program and would route to a quote.`,
-                          })
-                        }
-                      >
-                        Request quote
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          addDraftLine({
-                            productId: product.id,
-                            code: product.code,
-                            name: product.name,
-                            unitPrice: product.demoUnitPrice!,
-                            eachPerCase: product.caseCount,
-                          });
-                          toast.success("Added to demo order", { description: product.code });
-                        }}
-                      >
-                        Add case to order
-                      </Button>
-                    )
-                  }
-                />
-                {(product.quantityBreaks || product.warehouses) && (
-                  <div className="grid gap-4 border-x border-b border-border bg-secondary p-3 sm:grid-cols-2">
-                    {product.quantityBreaks && (
-                      <div>
-                        <p className="label-caps text-muted-foreground">Quantity breaks</p>
+            {results.map((product) => {
+              const yourPrice = resolvePrice(accountId, product.id, 1);
+              const avail = availabilityFor(product.id, simulateStaleInventory);
+              return (
+                <div key={product.id}>
+                  <ProductCard
+                    product={product}
+                    view="list"
+                    mode="portal"
+                    action={
+                      yourPrice == null ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            addDraftLine({
+                              productId: product.id,
+                              code: product.code,
+                              name: product.name,
+                              eachPerCase: product.caseCount,
+                              cases: account.caseMinimum,
+                              unitPrice: null,
+                            });
+                            toast.info("Added for quoting", {
+                              description: `${product.code} has no current price for ${account.id}; customer service would quote it.`,
+                            });
+                          }}
+                        >
+                          Request quote
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            addDraftLine({
+                              productId: product.id,
+                              code: product.code,
+                              name: product.name,
+                              eachPerCase: product.caseCount,
+                              cases: account.caseMinimum,
+                            });
+                            toast.success("Added to demo order", { description: product.code });
+                          }}
+                        >
+                          Add to order
+                        </Button>
+                      )
+                    }
+                  />
+                  <div className="grid gap-4 border-x border-b border-border bg-secondary p-3 sm:grid-cols-3">
+                    <div>
+                      <p className="label-caps text-muted-foreground">Your price</p>
+                      <p className="tabular mt-1 text-sm">
+                        {yourPrice
+                          ? `${money(yourPrice.currentPrice, 3)} / item · ${yourPrice.basis}`
+                          : "Request quote"}
+                      </p>
+                      {yourPrice && (
+                        <p className="spec-note">Effective {yourPrice.effective}</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="label-caps text-muted-foreground">Quantity breaks</p>
+                      {product.quantityBreaks ? (
                         <ul className="spec-note mt-1 space-y-0.5">
                           {product.quantityBreaks.map((b) => (
                             <li key={b.minCases}>
@@ -205,22 +290,36 @@ function PrivateCatalog() {
                             </li>
                           ))}
                         </ul>
-                      </div>
-                    )}
+                      ) : (
+                        <p className="spec-note mt-1">Single price band in the demo data</p>
+                      )}
+                    </div>
                     <div>
-                      <p className="label-caps text-muted-foreground">Available to sell</p>
-                      <p className="spec-note mt-1">
-                        {(product.availableToSell ?? 0).toLocaleString()} ea ·{" "}
-                        {product.warehouses
-                          ?.map((w) => `${w.code} ${w.qty.toLocaleString()}`)
-                          .join(" · ") || "No stocking warehouse"}
-                      </p>
-                      <p className="spec-note">As of {account.asOf}</p>
+                      <p className="label-caps text-muted-foreground">Availability</p>
+                      {avail ? (
+                        <>
+                          <p className="spec-note mt-1">
+                            {avail.state === "Unavailable"
+                              ? "Unavailable — not currently stocked"
+                              : `${avail.availableCases.toLocaleString()} cases · ${avail.warehouse}`}
+                          </p>
+                          <p className="spec-note">As of {avail.asOf}</p>
+                          {avail.state === "Stale" && (
+                            <p className="label-caps mt-1 text-accent">
+                              Stale snapshot — confirm before committing
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <p className="spec-note mt-1">
+                          Not tracked in the demo data — request details
+                        </p>
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

@@ -35,7 +35,7 @@ function PortalGate() {
   if (!role) {
     return (
       <div className="mx-auto max-w-[1400px] px-4 py-16">
-        <div className="grid gap-10 lg:grid-cols-[1fr_460px]">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_460px]">
           <div>
             <p className="label-caps text-muted-foreground">Taral Direct · account service</p>
             <h1 className="mt-3 max-w-[24ch] font-display text-4xl font-bold tracking-tight">

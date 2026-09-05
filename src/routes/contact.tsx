@@ -58,7 +58,7 @@ function Contact() {
         </p>
       </div>
 
-      <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_380px]">
+      <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_380px]">
         <section aria-labelledby="form-heading" className="min-w-0">
           <h2 id="form-heading" className="label-caps text-muted-foreground">
             Send a message

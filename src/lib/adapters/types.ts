@@ -8,7 +8,7 @@
  */
 
 import type { Product } from "@/data/products";
-import type { DemoInvoice, DemoOrder, DemoAccount, PriceBookRow } from "@/data/portal";
+import type { DemoInvoice, DemoOrder, DemoAccount, PriceBookRow, InventoryState } from "@/data/portal";
 
 export type AdapterMode = "mock" | "live";
 
@@ -34,8 +34,24 @@ export interface SampleRequestPayload {
 }
 
 export interface SampleRequestResult {
-  reference: string;
   followUp: string[];
+}
+
+/** Result of re-reading price and availability at order-review time. */
+export interface CartCheck {
+  ok: boolean;
+  message: string;
+  issues: string[];
+  priced: {
+    productId: string;
+    code: string;
+    cases: number;
+    unitPrice: number | null;
+    basis: string | null;
+    effective: string | null;
+    availableCases: number | null;
+    availability: InventoryState | null;
+  }[];
 }
 
 /** Acumatica is the intended system of record for everything below. */
@@ -50,21 +66,26 @@ export interface AcumaticaAdapter {
   revalidateCart(
     accountId: string,
     lines: { productId: string; cases: number }[],
-  ): Promise<AdapterResult<{ ok: boolean; message: string }>>;
+    options?: { staleInventory?: boolean },
+  ): Promise<AdapterResult<CartCheck>>;
   submitSampleRequest(payload: SampleRequestPayload): Promise<AdapterResult<SampleRequestResult>>;
 }
 
 export type PaymentMethodKind = "card" | "ach";
+
+export type PaymentSimulation = "Applied" | "Declined" | "Received — ERP posting pending";
 
 export interface PaymentIntentRequest {
   accountId: string;
   invoiceId: string;
   amount: number;
   method: PaymentMethodKind;
+  /** Which outcome the presenter chose to demonstrate. */
+  simulate: PaymentSimulation;
 }
 
 export interface PaymentIntentResult {
-  reference: string;
+  outcome: PaymentSimulation;
   /** Plain-language description of what a real processor would do next. */
   settlementSteps: string[];
 }

@@ -89,7 +89,7 @@ function Catalog() {
         </p>
       </div>
 
-      <div className="grid gap-8 pt-6 lg:grid-cols-[264px_1fr]">
+      <div data-demo-target="catalog" className="grid gap-8 pt-6 lg:grid-cols-[264px_1fr]">
         <CatalogFilters filters={filters} onChange={setFilters} products={PRODUCTS} />
 
         <div className="min-w-0">
