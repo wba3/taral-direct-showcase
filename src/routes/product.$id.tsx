@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { ArrowLeft, Download, FlaskConical } from "lucide-react";
+import { ArrowLeft, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DemoTag } from "@/components/site/DemoTag";
 import { ProductSilhouette } from "@/components/site/ProductSilhouette";
@@ -69,7 +69,10 @@ function ProductDetail() {
         <ArrowLeft className="size-3.5" /> Back to catalog
       </Link>
 
-      <div data-demo-target="product" className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+      <div
+        data-demo-target="product"
+        className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
+      >
         {/* Imagery + silhouette */}
         <div className="lg:sticky lg:top-[73px] lg:self-start">
           <div className="border border-border">
@@ -102,16 +105,8 @@ function ProductDetail() {
               </div>
             </div>
           </div>
-          <Button
-            variant="rail"
-            className="mt-3 w-full"
-            onClick={() =>
-              toast.info("Technical drawing (prototype)", {
-                description: `A dimensioned PDF for ${product.code} would download here.`,
-              })
-            }
-          >
-            <Download className="size-3.5" /> Technical drawing
+          <Button variant="rail" className="mt-3 w-full" asChild>
+            <Link to="/contact">Request a technical drawing</Link>
           </Button>
         </div>
 
@@ -122,7 +117,7 @@ function ProductDetail() {
             {product.name}
           </h1>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="label-caps text-muted-foreground">{product.stock}</span>
+            <span className="label-caps text-muted-foreground">Confirm availability</span>
             {product.overstock && <DemoTag tone="neutral">Overstock</DemoTag>}
             <DemoTag tone={product.source === "current-site" ? "neutral" : "illustrative"}>
               {product.source === "current-site" ? "From current site" : "Illustrative"}
@@ -199,7 +194,9 @@ function ProductDetail() {
               <li>
                 Available to sell:{" "}
                 <span className="tabular text-foreground">
-                  {(product.availableToSell ?? 0).toLocaleString()} ea
+                  {product.availableToSell == null
+                    ? "Unconfirmed"
+                    : `${product.availableToSell.toLocaleString()} ea`}
                 </span>{" "}
                 <DemoTag tone="illustrative" />
               </li>
@@ -208,12 +205,6 @@ function ProductDetail() {
                   {w.code} · {w.name} — {w.qty.toLocaleString()} ea
                 </li>
               ))}
-              {product.publicCasePrice !== null && (
-                <li className="spec-note">
-                  Published case price {money(product.publicCasePrice)} ·{" "}
-                  {product.caseCount.toLocaleString()} per case
-                </li>
-              )}
             </ul>
           </section>
 

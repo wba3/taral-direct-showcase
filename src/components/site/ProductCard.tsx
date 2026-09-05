@@ -143,7 +143,7 @@ export function ProductCard({
           <div className="min-w-0">
             <p className="spec-note text-foreground">{product.code}</p>
             <h3 className="truncate text-sm font-semibold">{product.name}</h3>
-            <StockMark product={product} />
+            <StockMark product={product} mode={mode} />
           </div>
         </div>
         <div className="flex-1">{specs}</div>
@@ -183,7 +183,7 @@ export function ProductCard({
             {product.name}
           </h3>
           <div className="mt-1">
-            <StockMark product={product} />
+            <StockMark product={product} mode={mode} />
           </div>
         </div>
         {specs}
