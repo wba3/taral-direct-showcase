@@ -14,7 +14,7 @@ import {
   type FilterState,
 } from "@/components/site/CatalogFilters";
 import { PRODUCTS, money } from "@/data/products";
-import { resolvePrice } from "@/data/portal";
+import { resolvePrice, priceBookFor, isFuture, orderMinimumFor } from "@/data/portal";
 import { newReference, wholeQty } from "@/lib/demo-store";
 import { availabilityFor, usePortalView } from "@/lib/portal-view";
 import { services } from "@/lib/adapters/mock";
@@ -50,7 +50,10 @@ function PrivateCatalog() {
 
   const results = useCatalogFilter(PRODUCTS, filters);
   const priced = draft.filter((l) => l.unitPrice != null);
-  const draftTotal = priced.reduce((sum, l) => sum + l.cases * l.eachPerCase * (l.unitPrice ?? 0), 0);
+  const draftTotal = priced.reduce(
+    (sum, l) => sum + l.cases * l.eachPerCase * (l.unitPrice ?? 0),
+    0,
+  );
   const unpriced = draft.length - priced.length;
 
   if (!account) {
@@ -98,7 +101,7 @@ function PrivateCatalog() {
       title="Order"
       intro={
         <p className="measure text-sm text-muted-foreground">
-          Your contract price sits beside the public list price. Quantity breaks, case counts and
+          Prices are specific to the selected demo account. Quantity breaks, case counts and
           availability reflect the demo data as of {asOf}. Orders are whole cases, minimum{" "}
           {account.caseMinimum} case per line. {account.smallOrderFee}.
         </p>
@@ -132,7 +135,10 @@ function PrivateCatalog() {
                         step={1}
                         value={line.cases}
                         onChange={(e) =>
-                          updateDraft(line.productId, wholeQty(e.target.value, account.caseMinimum, 9999))
+                          updateDraft(
+                            line.productId,
+                            wholeQty(e.target.value, account.caseMinimum, 9999),
+                          )
                         }
                         className="tabular h-8 w-20 rounded-sm"
                       />
@@ -212,7 +218,10 @@ function PrivateCatalog() {
         </div>
       }
     >
-      <div data-demo-target="portal-catalog" className="grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]">
+      <div
+        data-demo-target="portal-catalog"
+        className="grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]"
+      >
         <CatalogFilters filters={filters} onChange={setFilters} products={PRODUCTS} />
         <div className="min-w-0">
           <p className="spec-note border-b border-border pb-3">
@@ -220,7 +229,11 @@ function PrivateCatalog() {
           </p>
           <div className="mt-4 flex flex-col gap-3">
             {results.map((product) => {
-              const yourPrice = resolvePrice(accountId, product.id, 1);
+              const minimum = orderMinimumFor(accountId, product.id);
+              const yourPrice = resolvePrice(accountId, product.id, minimum);
+              const tiers = priceBookFor(accountId)
+                .filter((r) => r.productId === product.id && !isFuture(r.effective))
+                .sort((a, b) => a.minCases - b.minCases);
               const avail = availabilityFor(product.id, simulateStaleInventory);
               return (
                 <div key={product.id}>
@@ -239,7 +252,7 @@ function PrivateCatalog() {
                               code: product.code,
                               name: product.name,
                               eachPerCase: product.caseCount,
-                              cases: account.caseMinimum,
+                              cases: minimum,
                               unitPrice: null,
                             });
                             toast.info("Added for quoting", {
@@ -258,7 +271,7 @@ function PrivateCatalog() {
                               code: product.code,
                               name: product.name,
                               eachPerCase: product.caseCount,
-                              cases: account.caseMinimum,
+                              cases: minimum,
                             });
                             toast.success("Added to demo order", { description: product.code });
                           }}
@@ -276,22 +289,20 @@ function PrivateCatalog() {
                           ? `${money(yourPrice.currentPrice, 3)} / item · ${yourPrice.basis}`
                           : "Request quote"}
                       </p>
-                      {yourPrice && (
-                        <p className="spec-note">Effective {yourPrice.effective}</p>
-                      )}
+                      {yourPrice && <p className="spec-note">Effective {yourPrice.effective}</p>}
                     </div>
                     <div>
                       <p className="label-caps text-muted-foreground">Quantity breaks</p>
-                      {product.quantityBreaks ? (
+                      {tiers.length ? (
                         <ul className="spec-note mt-1 space-y-0.5">
-                          {product.quantityBreaks.map((b) => (
+                          {tiers.map((b) => (
                             <li key={b.minCases}>
-                              {b.minCases}+ cases — {money(b.unitPrice, 3)} / item
+                              {b.minCases}+ cases — {money(b.currentPrice, 3)} / item
                             </li>
                           ))}
                         </ul>
                       ) : (
-                        <p className="spec-note mt-1">Single price band in the demo data</p>
+                        <p className="spec-note mt-1">No current account price</p>
                       )}
                     </div>
                     <div>
