@@ -48,69 +48,53 @@ function ProvenanceTag({ product }: { product: Product }) {
   );
 }
 
-function StockMark({ product }: { product: Product }) {
-  const tone =
-    product.stock === "In stock"
-      ? "text-primary"
-      : product.stock === "Low stock"
-        ? "text-accent"
-        : "text-muted-foreground";
-  return (
-    <span className={cn("label-caps", tone)}>
-      {product.stock}
-      {product.overstock ? " · Overstock" : ""}
-    </span>
-  );
+function StockMark({ product, mode }: { product: Product; mode: "public" | "portal" }) {
+  const { simulateStaleInventory } = useDemo();
+  const snapshot = inventoryFor(product.id);
+  const label =
+    mode === "public"
+      ? "Contact for availability"
+      : !snapshot
+        ? "Availability unconfirmed"
+        : simulateStaleInventory || snapshot.state === "Stale"
+          ? "Stale demo snapshot"
+          : snapshot.state === "Unavailable" || snapshot.availableCases === 0
+            ? "Unavailable"
+            : `${snapshot.availableCases} cases · demo stock`;
+  return <span className="label-caps text-muted-foreground">{label}</span>;
 }
 
 export function PriceState({ product, mode }: { product: Product; mode: "public" | "portal" }) {
-  if (mode === "portal") {
-    if (product.demoUnitPrice === null) {
-      return (
-        <div>
-          <p className="label-caps text-muted-foreground">Quote required</p>
-          <p className="spec-note">Custom program — priced per run</p>
-        </div>
-      );
-    }
+  const { accountId } = useDemo();
+  if (mode === "public")
     return (
       <div>
-        <p className="label-caps text-muted-foreground">Your price</p>
-        <p className="tabular font-display text-lg font-semibold">
-          {money(product.demoUnitPrice, 3)}
-          <span className="spec-note"> / item</span>
-        </p>
-        <p className="spec-note">
-          {product.publicUnitPrice !== null
-            ? `List ${money(product.publicUnitPrice, 2)} / item`
-            : "No published list price"}
-        </p>
-        <DemoTag tone="illustrative" className="mt-1" />
+        <p className="label-caps text-muted-foreground">Account pricing</p>
+        <Link to="/portal" className="text-sm underline underline-offset-4">
+          Sign in for account pricing
+        </Link>
       </div>
     );
-  }
-
-  if (product.publicUnitPrice !== null) {
+  const minimum = orderMinimumFor(accountId, product.id);
+  const row = resolvePrice(accountId, product.id, minimum);
+  if (!row)
     return (
       <div>
-        <p className="label-caps text-muted-foreground">Public list price</p>
-        <p className="tabular font-display text-lg font-semibold">
-          {money(product.publicUnitPrice)}
-          <span className="spec-note"> / item</span>
-        </p>
-        {product.publicCasePrice !== null && (
-          <p className="spec-note">
-            {money(product.publicCasePrice)} / case · {product.caseCount.toLocaleString()} per case
-          </p>
-        )}
+        <p className="label-caps text-muted-foreground">Request quote</p>
+        <p className="spec-note">No current price for this demo account</p>
       </div>
     );
-  }
-
   return (
     <div>
-      <p className="label-caps text-accent">Request quote</p>
-      <p className="spec-note">Pricing supplied per specification and volume</p>
+      <p className="label-caps text-muted-foreground">Your demo price</p>
+      <p className="tabular font-display text-lg font-semibold">
+        {money(row.currentPrice, 3)}
+        <span className="spec-note"> / item</span>
+      </p>
+      <p className="spec-note">
+        {money(row.currentPrice * product.caseCount, 2)} / case · {minimum}+ cases
+      </p>
+      <DemoTag tone="illustrative" className="mt-1" />
     </div>
   );
 }
