@@ -448,9 +448,7 @@ export const INVOICES: DemoInvoice[] = [
     originalTotal: 3920,
     seedPaid: 0,
     credit: 0,
-    lines: [
-      { description: "1-48-TW-WPPT · 20 cases", qty: "20,000 ea", amount: 3920 },
-    ],
+    lines: [{ description: "1-48-TW-WPPT · 20 cases", qty: "20,000 ea", amount: 3920 }],
   },
   {
     id: "INV-89740",
@@ -671,3 +669,14 @@ export const INVENTORY: InventorySnapshot[] = [
 
 export const inventoryFor = (productId: string) =>
   INVENTORY.find((i) => i.productId === productId) ?? null;
+
+/** Starting whole-case quantity for an account and its first current price tier. */
+export function orderMinimumFor(accountId: string | null, productId: string) {
+  const tiers = priceBookFor(accountId).filter(
+    (r) => r.productId === productId && !isFuture(r.effective),
+  );
+  return Math.max(
+    getAccount(accountId)?.caseMinimum ?? 1,
+    tiers.length ? Math.min(...tiers.map((r) => r.minCases)) : 1,
+  );
+}
