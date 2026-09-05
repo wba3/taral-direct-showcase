@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as CatalogRouteImport } from './routes/catalog'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as IntegrationRouteImport } from './routes/integration'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as SamplesRouteImport } from './routes/samples'
@@ -38,6 +39,11 @@ const AboutRoute = AboutRouteImport.update({
 const CatalogRoute = CatalogRouteImport.update({
   id: '/catalog',
   path: '/catalog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IntegrationRoute = IntegrationRouteImport.update({
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/catalog': typeof CatalogRoute
+  '/contact': typeof ContactRoute
   '/integration': typeof IntegrationRoute
   '/portal': typeof PortalRouteWithChildren
   '/samples': typeof SamplesRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/catalog': typeof CatalogRoute
+  '/contact': typeof ContactRoute
   '/integration': typeof IntegrationRoute
   '/samples': typeof SamplesRoute
   '/admin/assets': typeof AdminAssetsRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/catalog': typeof CatalogRoute
+  '/contact': typeof ContactRoute
   '/integration': typeof IntegrationRoute
   '/portal': typeof PortalRouteWithChildren
   '/samples': typeof SamplesRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/catalog'
+    | '/contact'
     | '/integration'
     | '/portal'
     | '/samples'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/catalog'
+    | '/contact'
     | '/integration'
     | '/samples'
     | '/admin/assets'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/catalog'
+    | '/contact'
     | '/integration'
     | '/portal'
     | '/samples'
@@ -209,6 +221,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   CatalogRoute: typeof CatalogRoute
+  ContactRoute: typeof ContactRoute
   IntegrationRoute: typeof IntegrationRoute
   PortalRoute: typeof PortalRouteWithChildren
   SamplesRoute: typeof SamplesRoute
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       path: '/catalog'
       fullPath: '/catalog'
       preLoaderRoute: typeof CatalogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/integration': {
@@ -352,6 +372,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   CatalogRoute: CatalogRoute,
+  ContactRoute: ContactRoute,
   IntegrationRoute: IntegrationRoute,
   PortalRoute: PortalRouteWithChildren,
   SamplesRoute: SamplesRoute,
