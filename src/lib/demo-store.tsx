@@ -163,7 +163,7 @@ interface Ctx extends DemoState {
   hydrated: boolean;
   orders: DemoOrder[];
   addSample: (line: Omit<SampleLine, "qty" | "note"> & { qty?: number }) => boolean;
-  updateSample: (productId: string, patch: Partial<SampleLine>) => void;
+  updateSample: (productId: string, patch: Partial<Pick<SampleLine, "qty" | "note">>) => void;
   removeSample: (productId: string) => void;
   clearSamples: () => void;
   addDraftLine: (line: {
@@ -172,7 +172,7 @@ interface Ctx extends DemoState {
     name: string;
     eachPerCase: number;
     cases?: number;
-    /** Fallback price when the account has no price-book entry. */
+    /** Legacy display hint; ordering always resolves the account price book. */
     unitPrice?: number | null;
   }) => void;
   updateDraft: (productId: string, cases: number) => void;
@@ -253,7 +253,14 @@ export function DemoProvider({ children }: { children: ReactNode }) {
             ...s,
             samples: s.samples.map((l) =>
               l.productId === line.productId
-                ? { ...l, qty: wholeQty(l.qty + wholeQty(line.qty ?? 1, 1, SAMPLE_MAX_QTY), 1, SAMPLE_MAX_QTY) }
+                ? {
+                    ...l,
+                    qty: wholeQty(
+                      l.qty + wholeQty(line.qty ?? 1, 1, SAMPLE_MAX_QTY),
+                      1,
+                      SAMPLE_MAX_QTY,
+                    ),
+                  }
                 : l,
             ),
           };
@@ -283,11 +290,8 @@ export function DemoProvider({ children }: { children: ReactNode }) {
           l.productId === productId
             ? {
                 ...l,
-                ...patch,
-                qty:
-                  patch.qty === undefined
-                    ? l.qty
-                    : wholeQty(patch.qty, 1, SAMPLE_MAX_QTY),
+                note: patch.note ?? l.note,
+                qty: patch.qty === undefined ? l.qty : wholeQty(patch.qty, 1, SAMPLE_MAX_QTY),
               }
             : l,
         ),
@@ -307,11 +311,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   /* ── Order draft ────────────────────────────────────────────────────── */
 
   /** Reprices a single line at its final quantity for the current account. */
-  const priceLine = (
-    accountId: string | null,
-    line: OrderDraftLine,
-    fallback: number | null,
-  ): OrderDraftLine => {
+  const priceLine = (accountId: string | null, line: OrderDraftLine): OrderDraftLine => {
     const row = resolvePrice(accountId, line.productId, line.cases);
     if (row) {
       return {
@@ -323,8 +323,8 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     }
     return {
       ...line,
-      unitPrice: fallback,
-      priceBasis: fallback == null ? "No current price entry" : "Reference price",
+      unitPrice: null,
+      priceBasis: "No current price entry",
       priceEffective: "",
     };
   };
@@ -338,7 +338,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
           const existing = s.draft[idx]!;
           const merged = { ...existing, cases: wholeQty(existing.cases + add, 1, 9999) };
           const next = [...s.draft];
-          next[idx] = priceLine(s.accountId, merged, line.unitPrice ?? existing.unitPrice);
+          next[idx] = priceLine(s.accountId, merged);
           return { ...s, draft: next };
         }
         const fresh: OrderDraftLine = {
@@ -353,7 +353,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
         };
         return {
           ...s,
-          draft: [...s.draft, priceLine(s.accountId, fresh, line.unitPrice ?? null)],
+          draft: [...s.draft, priceLine(s.accountId, fresh)],
         };
       });
     },
@@ -367,7 +367,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
         ...s,
         draft: s.draft.map((l) =>
           l.productId === productId
-            ? priceLine(s.accountId, { ...l, cases: wholeQty(cases, 1, 9999) }, l.unitPrice)
+            ? priceLine(s.accountId, { ...l, cases: wholeQty(cases, 1, 9999) })
             : l,
         ),
       }));
@@ -387,11 +387,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
 
   const setAccount = useCallback<Ctx["setAccount"]>(
     (accountId) => {
-      commit((s) =>
-        s.accountId === accountId
-          ? s
-          : { ...s, accountId, draft: [], samples: [] },
-      );
+      commit((s) => (s.accountId === accountId ? s : { ...s, accountId, draft: [], samples: [] }));
     },
     [commit],
   );
@@ -420,7 +416,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   );
 
   const exitDemo = useCallback(
-    () => commit((s) => ({ ...s, role: null, accountId: null, draft: [] })),
+    () => commit((s) => ({ ...s, role: null, accountId: null, draft: [], samples: [] })),
     [commit],
   );
 
@@ -432,14 +428,18 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       const account = getAccount(s.accountId);
       if (!account) return { ok: false, order: null, errors: ["Select a demo account first."] };
 
-      const duplicate = s.localOrders.find((o) => o.po === po && o.idempotencyKey === idempotencyKey);
+      const duplicate = s.localOrders.find(
+        (o) => o.accountId === account.id && o.idempotencyKey === idempotencyKey,
+      );
       if (duplicate) return { ok: true, order: duplicate, errors: [], duplicate: true };
 
       const errors: string[] = [];
+      if (!idempotencyKey.trim()) errors.push("A submission reference is required.");
+      const checkedLines = s.draft.map((line) => priceLine(account.id, line));
       if (s.draft.length === 0) errors.push("The draft is empty.");
       if (!po.trim()) errors.push("A purchase-order reference is required.");
 
-      for (const line of s.draft) {
+      for (const line of checkedLines) {
         if (!Number.isInteger(line.cases) || line.cases < 1) {
           errors.push(`${line.code}: order in whole cases.`);
         }
@@ -454,8 +454,10 @@ export function DemoProvider({ children }: { children: ReactNode }) {
           errors.push(`${line.code}: availability unknown — request details.`);
         } else if (snap.state === "Unavailable" || snap.availableCases === 0) {
           errors.push(`${line.code}: not currently available to sell.`);
-        } else if (s.simulateStaleInventory) {
-          errors.push(`${line.code}: availability snapshot is stale — revalidate before submitting.`);
+        } else if (s.simulateStaleInventory || snap.state === "Stale") {
+          errors.push(
+            `${line.code}: availability snapshot is stale — revalidate before submitting.`,
+          );
         } else if (snap.availableCases < line.cases) {
           errors.push(
             `${line.code}: only ${snap.availableCases} case(s) available, ${line.cases} requested.`,
@@ -474,7 +476,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
         status: "Submitted",
         shipment: "Not yet released (simulated)",
         tracking: null,
-        lines: s.draft.map((l) => ({
+        lines: checkedLines.map((l) => ({
           productId: l.productId,
           code: l.code,
           description: l.name,
@@ -521,7 +523,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
             });
           }
         }
-        next = next.map((l) => priceLine(s.accountId, l, null));
+        next = next.map((l) => priceLine(s.accountId, l));
         unpriced = next.filter((l) => l.unitPrice == null).length;
         return { ...s, draft: next };
       });
@@ -597,7 +599,8 @@ export function DemoProvider({ children }: { children: ReactNode }) {
         return {
           ok: false,
           attempt: null,
-          message: "A collection is already received and waiting to post. Staff must finish it first.",
+          message:
+            "A collection is already received and waiting to post. Staff must finish it first.",
         };
       }
       const outstanding = invoiceOutstanding(invoice, current.applied);
