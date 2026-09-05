@@ -1,12 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { toast } from "sonner";
-import { Download, RefreshCw } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
-import { Button } from "@/components/ui/button";
 import { DemoTag } from "@/components/site/DemoTag";
-import { runHarvest } from "@/lib/harvest.functions";
 import { getSiteAssetIndex } from "@/lib/site-assets.functions";
 
 export const Route = createFileRoute("/admin/assets")({
@@ -30,25 +25,9 @@ export const Route = createFileRoute("/admin/assets")({
 });
 
 function AssetLibrary() {
-  const queryClient = useQueryClient();
-  const harvest = useServerFn(runHarvest);
-
   const { data, isLoading } = useQuery({
     queryKey: ["site-asset-index"],
     queryFn: () => getSiteAssetIndex(),
-  });
-
-  const mutation = useMutation({
-    mutationFn: () => harvest(),
-    onSuccess: (result) => {
-      if (result.ok) toast.success("Harvest complete", { description: result.message });
-      else toast.warning("Harvest finished with notes", { description: result.message });
-      void queryClient.invalidateQueries({ queryKey: ["site-asset-index"] });
-    },
-    onError: (error) =>
-      toast.error("Harvest failed", {
-        description: error instanceof Error ? error.message : "Unknown error",
-      }),
   });
 
   const assets = data?.assets ?? [];
@@ -67,18 +46,11 @@ function AssetLibrary() {
           <h1 className="mt-3 font-display text-3xl font-bold tracking-tight">Asset library</h1>
           <p className="measure mt-3 text-sm text-muted-foreground">
             Pulls graphics and product listings from the public taralplastics.com pages, stores the
-            files in this project's backend, and serves them from a stable URL. Re-running is safe —
-            files already stored are skipped.
+            files in this project's backend, and serves them from a stable URL. The import already
+            ran; it is now switched off because it needs authenticated staff access, which this
+            prototype does not have.
           </p>
         </div>
-        <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
-          {mutation.isPending ? (
-            <RefreshCw className="size-4 animate-spin" />
-          ) : (
-            <Download className="size-4" />
-          )}
-          {mutation.isPending ? "Harvesting…" : "Harvest site imagery"}
-        </Button>
       </div>
 
       <dl className="grid gap-px border-b border-border bg-border sm:grid-cols-3">
@@ -94,31 +66,11 @@ function AssetLibrary() {
         ))}
       </dl>
 
-      {mutation.data?.summary && (
-        <div className="mt-6 border border-border p-5">
-          <h2 className="font-display text-base font-semibold">Last run</h2>
-          <p className="spec-note mt-1">
-            {mutation.data.summary.pages} pages · {mutation.data.summary.imagesFound} images found ·{" "}
-            {mutation.data.summary.imagesStored} stored · {mutation.data.summary.imagesSkipped}{" "}
-            already present · {mutation.data.summary.products} listings
-          </p>
-          {mutation.data.summary.errors.length > 0 && (
-            <ul className="mt-3 space-y-1">
-              {mutation.data.summary.errors.slice(0, 12).map((error) => (
-                <li key={error} className="spec-note text-accent">
-                  {error}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
-
       {isLoading && <p className="mt-8 text-sm text-muted-foreground">Loading library…</p>}
 
       {!isLoading && assets.length === 0 && (
         <p className="measure mt-8 text-sm text-muted-foreground">
-          Nothing stored yet. Run the harvest to pull the real site graphics into this project.
+          Nothing stored yet.
         </p>
       )}
 

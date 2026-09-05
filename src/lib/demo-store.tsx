@@ -7,7 +7,20 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { SEED_ORDERS, type DemoOrder } from "@/data/portal";
+import {
+  DEMO_ROLES,
+  SEED_ORDERS,
+  getRole,
+  resolvePrice,
+  type DemoOrder,
+  type DemoRoleId,
+} from "@/data/portal";
+
+/**
+ * All prototype state lives in this browser. It is a demonstration convenience,
+ * not an authorization boundary: a real deployment authorizes every read and
+ * write on the server against a signed-in user.
+ */
 
 export interface SampleLine {
   productId: string;
@@ -24,42 +37,115 @@ export interface OrderDraftLine {
   cases: number;
   unitPrice: number;
   eachPerCase: number;
+  /** Price basis resolved at the moment the line was priced. */
+  priceBasis: string;
+  priceEffective: string;
+}
+
+export type SampleStatus =
+  | "Received"
+  | "Approved"
+  | "Queued for ERP"
+  | "Synced (simulated)"
+  | "Sync failed (simulated)"
+  | "Shipped (simulated)";
+
+export interface SampleEvent {
+  at: string;
+  text: string;
+}
+
+export interface SampleRequest {
+  reference: string;
+  idempotencyKey: string;
+  submittedAt: string;
+  status: SampleStatus;
+  contact: { company: string; name: string; email: string; phone: string; address: string };
+  shipping: string;
+  carrierAccount?: string;
+  notes?: string;
+  items: { productId: string; code: string; name: string; qty: number; note: string }[];
+  events: SampleEvent[];
+}
+
+export interface PaymentAttempt {
+  id: string;
+  invoiceId: string;
+  amount: number;
+  at: string;
+  outcome: "Applied" | "Declined" | "Received — ERP posting pending";
+}
+
+export interface InvoicePaymentState {
+  /** Applied to the balance. */
+  applied: number;
+  /** Collected but not yet posted to the ERP. Blocks another charge. */
+  pending: number;
 }
 
 interface DemoState {
+  role: DemoRoleId | null;
+  accountId: string | null;
   samples: SampleLine[];
   draft: OrderDraftLine[];
-  accountId: string | null;
   localOrders: DemoOrder[];
-  paidInvoices: string[];
+  sampleRequests: SampleRequest[];
+  payments: Record<string, InvoicePaymentState>;
+  attempts: PaymentAttempt[];
+  /** Owner toggles shown only in Demo controls. */
+  simulatePriceUpdate: boolean;
+  simulateStaleInventory: boolean;
 }
 
 const EMPTY: DemoState = {
+  role: null,
+  accountId: null,
   samples: [],
   draft: [],
-  accountId: null,
   localOrders: [],
-  paidInvoices: [],
+  sampleRequests: [],
+  payments: {},
+  attempts: [],
+  simulatePriceUpdate: false,
+  simulateStaleInventory: false,
 };
 
-const KEY = "taral-direct-demo-v1";
+const KEY = "taral-direct-demo-v2";
+
+const stamp = () => new Date().toISOString();
 
 interface Ctx extends DemoState {
   hydrated: boolean;
+  orders: DemoOrder[];
   addSample: (line: Omit<SampleLine, "qty" | "note"> & { qty?: number }) => void;
   updateSample: (productId: string, patch: Partial<SampleLine>) => void;
   removeSample: (productId: string) => void;
   clearSamples: () => void;
-  addDraftLine: (line: Omit<OrderDraftLine, "cases"> & { cases?: number }) => void;
+  addDraftLine: (line: Omit<OrderDraftLine, "cases" | "priceBasis" | "priceEffective"> & {
+    cases?: number;
+    priceBasis?: string;
+    priceEffective?: string;
+  }) => void;
   updateDraft: (productId: string, cases: number) => void;
   removeDraft: (productId: string) => void;
   clearDraft: () => void;
-  enterDemo: (accountId: string) => void;
+  setRole: (role: DemoRoleId | null) => void;
   exitDemo: () => void;
   placeDraftOrder: (po: string) => DemoOrder | null;
-  reorder: (order: DemoOrder) => void;
-  markInvoicePaid: (invoiceId: string) => void;
-  orders: DemoOrder[];
+  reorder: (order: DemoOrder) => { added: number; repriced: number };
+  submitSampleRequest: (
+    input: Omit<SampleRequest, "reference" | "submittedAt" | "status" | "events">,
+  ) => SampleRequest;
+  advanceSample: (reference: string, status: SampleStatus, note: string) => void;
+  recordPayment: (
+    invoiceId: string,
+    amount: number,
+    outcome: PaymentAttempt["outcome"],
+  ) => PaymentAttempt;
+  postPending: (invoiceId: string) => void;
+  paymentFor: (invoiceId: string) => InvoicePaymentState;
+  toggleSimulation: (key: "simulatePriceUpdate" | "simulateStaleInventory") => void;
+  resetDemo: () => void;
 }
 
 const DemoContext = createContext<Ctx | null>(null);
@@ -94,14 +180,13 @@ export function DemoProvider({ children }: { children: ReactNode }) {
         return {
           ...s,
           samples: s.samples.map((l) =>
-            l.productId === line.productId ? { ...l, qty: l.qty + (line.qty ?? 1) } : l,
+            l.productId === line.productId
+              ? { ...l, qty: Math.min(12, l.qty + (line.qty ?? 1)) }
+              : l,
           ),
         };
       }
-      return {
-        ...s,
-        samples: [...s.samples, { ...line, qty: line.qty ?? 1, note: "" }],
-      };
+      return { ...s, samples: [...s.samples, { ...line, qty: line.qty ?? 1, note: "" }] };
     });
   }, []);
 
@@ -129,17 +214,42 @@ export function DemoProvider({ children }: { children: ReactNode }) {
           ),
         };
       }
-      return { ...s, draft: [...s.draft, { ...line, cases: line.cases ?? 1 }] };
+      return {
+        ...s,
+        draft: [
+          ...s.draft,
+          {
+            ...line,
+            cases: line.cases ?? 1,
+            priceBasis: line.priceBasis ?? "Price class",
+            priceEffective: line.priceEffective ?? "",
+          },
+        ],
+      };
     });
   }, []);
 
+  /** Re-resolves the demo price whenever the case quantity crosses a break. */
   const updateDraft = useCallback((productId: string, cases: number) => {
-    setState((s) => ({
-      ...s,
-      draft: s.draft.map((l) =>
-        l.productId === productId ? { ...l, cases: Math.max(1, cases) } : l,
-      ),
-    }));
+    setState((s) => {
+      const whole = Math.max(1, Math.floor(cases));
+      return {
+        ...s,
+        draft: s.draft.map((l) => {
+          if (l.productId !== productId) return l;
+          const row = resolvePrice(s.accountId, productId, whole);
+          return row
+            ? {
+                ...l,
+                cases: whole,
+                unitPrice: row.currentPrice,
+                priceBasis: row.basis,
+                priceEffective: row.effective,
+              }
+            : { ...l, cases: whole };
+        }),
+      };
+    });
   }, []);
 
   const removeDraft = useCallback((productId: string) => {
@@ -148,12 +258,19 @@ export function DemoProvider({ children }: { children: ReactNode }) {
 
   const clearDraft = useCallback(() => setState((s) => ({ ...s, draft: [] })), []);
 
-  const enterDemo = useCallback((accountId: string) => {
-    setState((s) => ({ ...s, accountId }));
+  /** Switching roles rescopes the session and clears account-scoped work. */
+  const setRole = useCallback((role: DemoRoleId | null) => {
+    const def = role ? (getRole(role) ?? null) : null;
+    setState((s) => ({
+      ...s,
+      role,
+      accountId: def?.accountId ?? null,
+      draft: [],
+    }));
   }, []);
 
   const exitDemo = useCallback(() => {
-    setState((s) => ({ ...s, accountId: null, draft: [] }));
+    setState((s) => ({ ...s, role: null, accountId: null, draft: [] }));
   }, []);
 
   const placeDraftOrder = useCallback<Ctx["placeDraftOrder"]>(
@@ -162,18 +279,20 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       const order: DemoOrder = {
         id: `SO-D${String(Date.now()).slice(-5)}`,
         accountId: state.accountId,
-        po: po || "ML-PO-DEMO",
+        po: po || "DEMO-PO",
         date: new Date().toISOString().slice(0, 10),
         status: "Submitted",
-        shipment: "Not yet released (demo)",
+        shipment: "Not yet released (simulated)",
         tracking: null,
         lines: state.draft.map((l) => ({
           productId: l.productId,
           code: l.code,
           description: l.name,
           cases: l.cases,
+          casesShipped: 0,
           eachPerCase: l.eachPerCase,
           unitPrice: l.unitPrice,
+          lineStatus: "Awaiting release" as const,
         })),
       };
       setState((s) => ({ ...s, localOrders: [order, ...s.localOrders], draft: [] }));
@@ -182,33 +301,140 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     [state.accountId, state.draft],
   );
 
-  const reorder = useCallback((order: DemoOrder) => {
+  /** Reorder always reprices against today's demo price book. */
+  const reorder = useCallback<Ctx["reorder"]>((order) => {
+    let repriced = 0;
+    let added = 0;
     setState((s) => {
       const next = [...s.draft];
       for (const line of order.lines) {
+        const cases = line.cases;
+        const row = resolvePrice(s.accountId, line.productId, cases);
+        const unitPrice = row?.currentPrice ?? line.unitPrice;
+        if (row && row.currentPrice !== line.unitPrice) repriced += 1;
         const idx = next.findIndex((l) => l.productId === line.productId);
         const existing = idx >= 0 ? next[idx] : undefined;
-        if (existing) next[idx] = { ...existing, cases: existing.cases + line.cases };
-        else
+        if (existing) {
+          next[idx] = { ...existing, cases: existing.cases + cases, unitPrice };
+        } else {
+          added += 1;
           next.push({
             productId: line.productId,
             code: line.code,
             name: line.description,
-            cases: line.cases,
-            unitPrice: line.unitPrice,
+            cases,
+            unitPrice,
             eachPerCase: line.eachPerCase,
+            priceBasis: row?.basis ?? "Historical (no current entry)",
+            priceEffective: row?.effective ?? "",
           });
+        }
       }
       return { ...s, draft: next };
     });
+    return { added, repriced };
   }, []);
 
-  const markInvoicePaid = useCallback((invoiceId: string) => {
-    setState((s) =>
-      s.paidInvoices.includes(invoiceId)
-        ? s
-        : { ...s, paidInvoices: [...s.paidInvoices, invoiceId] },
-    );
+  const submitSampleRequest = useCallback<Ctx["submitSampleRequest"]>(
+    (input) => {
+      const duplicate = state.sampleRequests.find(
+        (r) => r.idempotencyKey === input.idempotencyKey,
+      );
+      if (duplicate) return duplicate;
+      const at = stamp();
+      const request: SampleRequest = {
+        ...input,
+        reference: `SMP-${1048 + state.sampleRequests.length}`,
+        submittedAt: at,
+        status: "Received",
+        events: [{ at, text: "Request received in the prototype queue (simulated)." }],
+      };
+      setState((s) =>
+        s.sampleRequests.some((r) => r.idempotencyKey === input.idempotencyKey)
+          ? s
+          : { ...s, sampleRequests: [request, ...s.sampleRequests], samples: [] },
+      );
+      return request;
+    },
+    [state.sampleRequests],
+  );
+
+  const advanceSample = useCallback<Ctx["advanceSample"]>((reference, status, note) => {
+    setState((s) => ({
+      ...s,
+      sampleRequests: s.sampleRequests.map((r) =>
+        r.reference === reference
+          ? { ...r, status, events: [...r.events, { at: stamp(), text: note }] }
+          : r,
+      ),
+    }));
+  }, []);
+
+  const recordPayment = useCallback<Ctx["recordPayment"]>((invoiceId, amount, outcome) => {
+    const attempt: PaymentAttempt = {
+      id: `PAY-${String(Date.now()).slice(-6)}`,
+      invoiceId,
+      amount,
+      at: stamp(),
+      outcome,
+    };
+    setState((s) => {
+      const current = s.payments[invoiceId] ?? { applied: 0, pending: 0 };
+      const next =
+        outcome === "Applied"
+          ? { applied: current.applied + amount, pending: 0 }
+          : outcome === "Received — ERP posting pending"
+            ? { ...current, pending: amount }
+            : current;
+      return {
+        ...s,
+        payments: { ...s.payments, [invoiceId]: next },
+        attempts: [attempt, ...s.attempts],
+      };
+    });
+    return attempt;
+  }, []);
+
+  const postPending = useCallback((invoiceId: string) => {
+    setState((s) => {
+      const current = s.payments[invoiceId];
+      if (!current || current.pending === 0) return s;
+      return {
+        ...s,
+        payments: {
+          ...s.payments,
+          [invoiceId]: { applied: current.applied + current.pending, pending: 0 },
+        },
+        attempts: [
+          {
+            id: `PAY-${String(Date.now()).slice(-6)}`,
+            invoiceId,
+            amount: current.pending,
+            at: stamp(),
+            outcome: "Applied" as const,
+          },
+          ...s.attempts,
+        ],
+      };
+    });
+  }, []);
+
+  const paymentFor = useCallback(
+    (invoiceId: string) => state.payments[invoiceId] ?? { applied: 0, pending: 0 },
+    [state.payments],
+  );
+
+  const toggleSimulation = useCallback<Ctx["toggleSimulation"]>((key) => {
+    setState((s) => ({ ...s, [key]: !s[key] }));
+  }, []);
+
+  const resetDemo = useCallback(() => {
+    setState(EMPTY);
+    try {
+      window.localStorage.removeItem(KEY);
+    } catch {
+      /* nothing to clear */
+    }
   }, []);
 
   const orders = useMemo(() => {
@@ -228,11 +454,17 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     updateDraft,
     removeDraft,
     clearDraft,
-    enterDemo,
+    setRole,
     exitDemo,
     placeDraftOrder,
     reorder,
-    markInvoicePaid,
+    submitSampleRequest,
+    advanceSample,
+    recordPayment,
+    postPending,
+    paymentFor,
+    toggleSimulation,
+    resetDemo,
   };
 
   return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>;
@@ -243,3 +475,5 @@ export function useDemo() {
   if (!ctx) throw new Error("useDemo must be used inside DemoProvider");
   return ctx;
 }
+
+export const ROLE_OPTIONS = DEMO_ROLES;
