@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as DemoControlRouteImport } from './routes/demo-control'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as IntegrationRouteImport } from './routes/integration'
 import { Route as PortalRouteImport } from './routes/portal'
@@ -45,6 +46,11 @@ const CatalogRoute = CatalogRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoControlRoute = DemoControlRouteImport.update({
+  id: '/demo-control',
+  path: '/demo-control',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/catalog': typeof CatalogRoute
   '/contact': typeof ContactRoute
+  '/demo-control': typeof DemoControlRoute
   '/faq': typeof FaqRoute
   '/integration': typeof IntegrationRoute
   '/portal': typeof PortalRouteWithChildren
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/catalog': typeof CatalogRoute
   '/contact': typeof ContactRoute
+  '/demo-control': typeof DemoControlRoute
   '/faq': typeof FaqRoute
   '/integration': typeof IntegrationRoute
   '/samples': typeof SamplesRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/catalog': typeof CatalogRoute
   '/contact': typeof ContactRoute
+  '/demo-control': typeof DemoControlRoute
   '/faq': typeof FaqRoute
   '/integration': typeof IntegrationRoute
   '/portal': typeof PortalRouteWithChildren
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/catalog'
     | '/contact'
+    | '/demo-control'
     | '/faq'
     | '/integration'
     | '/portal'
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/catalog'
     | '/contact'
+    | '/demo-control'
     | '/faq'
     | '/integration'
     | '/samples'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/catalog'
     | '/contact'
+    | '/demo-control'
     | '/faq'
     | '/integration'
     | '/portal'
@@ -234,6 +246,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   CatalogRoute: typeof CatalogRoute
   ContactRoute: typeof ContactRoute
+  DemoControlRoute: typeof DemoControlRoute
   FaqRoute: typeof FaqRoute
   IntegrationRoute: typeof IntegrationRoute
   PortalRoute: typeof PortalRouteWithChildren
@@ -271,6 +284,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo-control': {
+      id: '/demo-control'
+      path: '/demo-control'
+      fullPath: '/demo-control'
+      preLoaderRoute: typeof DemoControlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq': {
@@ -393,6 +413,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   CatalogRoute: CatalogRoute,
   ContactRoute: ContactRoute,
+  DemoControlRoute: DemoControlRoute,
   FaqRoute: FaqRoute,
   IntegrationRoute: IntegrationRoute,
   PortalRoute: PortalRouteWithChildren,
