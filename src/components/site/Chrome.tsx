@@ -1,44 +1,57 @@
 import { Link } from "@tanstack/react-router";
-import { Compass, FlaskConical, Menu } from "lucide-react";
+import { FlaskConical, Menu, SlidersHorizontal, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useDemo } from "@/lib/demo-store";
-import { useGuidedDemo } from "@/lib/guided-demo";
+import { useSiteImages } from "@/lib/site-images";
+import { getRole } from "@/data/portal";
+
+const LOGO_FALLBACK = "https://taralplastics.com/images/logo.png";
 
 export function PrototypeBanner() {
   return (
     <div className="border-b border-border bg-steel-deep text-primary-foreground">
       <p className="label-caps mx-auto flex max-w-[1400px] items-center gap-2 px-4 py-2 text-[0.625rem] sm:text-[0.6875rem]">
         <span aria-hidden="true" className="inline-block size-1.5 rounded-full bg-accent" />
-        Interactive prototype · Demo data · No live systems connected
+        Interactive prototype · Demo transactions · Acumatica and payments not connected
       </p>
     </div>
   );
 }
 
 const NAV = [
-  { to: "/catalog", label: "Catalog" },
+  { to: "/catalog", label: "Products" },
   { to: "/samples", label: "Samples" },
-  { to: "/integration", label: "Integration" },
+  { to: "/about", label: "About" },
+  { to: "/contact", label: "Contact" },
 ] as const;
 
 export function Wordmark() {
+  const { logo } = useSiteImages();
   return (
-    <Link to="/" className="group flex items-baseline gap-2" aria-label="Taral Direct home">
-      <span className="font-display text-xl font-bold tracking-tight">TARAL</span>
-      <span className="label-caps border-l border-border pl-2 text-accent">Direct</span>
+    <Link to="/" className="flex items-center gap-3" aria-label="Taral Plastics home">
+      <img
+        src={logo ?? LOGO_FALLBACK}
+        alt="Taral Plastics"
+        width={132}
+        height={32}
+        className="h-7 w-auto sm:h-8"
+      />
+      <span className="label-caps hidden border-l border-border pl-3 text-accent sm:inline">
+        Direct
+      </span>
     </Link>
   );
 }
 
 export function SiteHeader() {
-  const { samples } = useDemo();
-  const { start, running } = useGuidedDemo();
+  const { samples, role } = useDemo();
   const count = samples.reduce((n, l) => n + l.qty, 0);
+  const activeRole = getRole(role);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-[2px]">
-      <div className="mx-auto flex max-w-[1400px] items-center gap-4 px-4 py-3">
+      <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 py-3">
         <Wordmark />
         <nav aria-label="Main" className="ml-6 hidden items-center gap-6 md:flex">
           {NAV.map((item) => (
@@ -53,24 +66,23 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <Button
-            variant="rail"
-            size="sm"
-            onClick={start}
-            aria-pressed={running}
-            className="hidden sm:inline-flex"
-          >
-            <Compass className="size-3.5" /> Guided demo
-          </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link to="/samples">
+            <Link to="/samples" aria-label={`Sample basket, ${count} items`}>
               <FlaskConical className="size-4" />
-              <span className="hidden xs:inline">Samples</span>
+              <span className="hidden sm:inline">Sample basket</span>
               <span className="tabular">({count})</span>
             </Link>
           </Button>
           <Button size="sm" asChild className="hidden sm:inline-flex">
-            <Link to="/portal">Distributor sign in</Link>
+            <Link to="/portal">
+              <UserRound className="size-4" />
+              {activeRole ? activeRole.label : "Account access"}
+            </Link>
+          </Button>
+          <Button variant="rail" size="sm" asChild className="hidden lg:inline-flex">
+            <Link to="/demo-control">
+              <SlidersHorizontal className="size-3.5" /> Demo controls
+            </Link>
           </Button>
           <Sheet>
             <SheetTrigger asChild>
@@ -78,10 +90,15 @@ export function SiteHeader() {
                 <Menu className="size-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72">
+            <SheetContent side="right" className="w-72 overflow-y-auto">
               <SheetTitle className="label-caps">Navigate</SheetTitle>
-              <nav aria-label="Mobile" className="mt-6 flex flex-col gap-1">
-                {[...NAV, { to: "/portal", label: "Distributor portal" }].map((item) => (
+              <nav aria-label="Mobile" className="mt-6 flex flex-col">
+                {[
+                  ...NAV,
+                  { to: "/faq", label: "FAQ" },
+                  { to: "/portal", label: "Account access" },
+                  { to: "/demo-control", label: "Demo controls" },
+                ].map((item) => (
                   <Link
                     key={item.to}
                     to={item.to}
@@ -90,9 +107,6 @@ export function SiteHeader() {
                     {item.label}
                   </Link>
                 ))}
-                <Button variant="rail" size="sm" onClick={start} className="mt-4">
-                  <Compass className="size-3.5" /> Guided demo
-                </Button>
               </nav>
             </SheetContent>
           </Sheet>
@@ -109,10 +123,10 @@ export function SiteFooter() {
         <div>
           <Wordmark />
           <p className="measure mt-4 text-sm text-muted-foreground">
-            Taral Plastics manufactures plastic packaging — jars, closures, discs, and add-ons —
-            with over 60 years of production experience.
+            Taral Plastics manufactures plastic packaging — jars, closures, discs, and add-ons — with
+            more than 60 years of production experience. Direct is the online account service for
+            samples, pricing, orders, and invoices.
           </p>
-          <p className="label-caps mt-5 text-accent">Concept prototype — not a production system</p>
         </div>
         <div>
           <h2 className="label-caps text-muted-foreground">Contact</h2>
@@ -127,38 +141,48 @@ export function SiteFooter() {
                 (510) 972-6300
               </a>
             </li>
+            <li>
+              <Link className="hover:underline" to="/contact">
+                Contact form
+              </Link>
+            </li>
           </ul>
         </div>
         <div>
-          <h2 className="label-caps text-muted-foreground">Prototype</h2>
+          <h2 className="label-caps text-muted-foreground">Customer service</h2>
           <ul className="mt-3 space-y-2 text-sm">
             <li>
-              <Link className="hover:underline" to="/catalog">
-                Product catalog
-              </Link>
-            </li>
-            <li>
               <Link className="hover:underline" to="/samples">
-                Sample request
+                Request samples
               </Link>
             </li>
             <li>
               <Link className="hover:underline" to="/portal">
-                Distributor portal
+                Account access
               </Link>
             </li>
             <li>
-              <Link className="hover:underline" to="/integration">
-                Integration blueprint
+              <Link className="hover:underline" to="/faq">
+                FAQ
               </Link>
+            </li>
+            <li>
+              <a
+                className="hover:underline"
+                href="https://taralplastics.com/"
+                rel="noreferrer"
+                target="_blank"
+              >
+                Pricing and terms on taralplastics.com
+              </a>
             </li>
           </ul>
         </div>
       </div>
       <div className="border-t border-border">
         <p className="spec-note mx-auto max-w-[1400px] px-4 py-4">
-          Demonstration environment · No Acumatica, database, or payment systems are connected ·
-          Figures labeled “Demo data” or “Illustrative” are not real business results.
+          Interactive prototype · Demo transactions · Acumatica and payments not connected. Prices,
+          balances, stock, orders, and payments shown here are synthetic examples.
         </p>
       </div>
     </footer>
