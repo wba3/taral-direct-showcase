@@ -35,7 +35,7 @@ export function PortalShell({
   const { exitDemo, draft, role } = useDemo();
   const draftCases = draft.reduce((n, l) => n + l.cases, 0);
   const roleDef = getRole(role);
-  const nav = ALL_NAV.filter((item) => (role ? item.roles.includes(role) : false));
+  const nav = ALL_NAV.filter((item) => (role ? (item.roles as readonly string[]).includes(role) : false));
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-8">

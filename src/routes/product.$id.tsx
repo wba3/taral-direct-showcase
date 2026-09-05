@@ -69,7 +69,7 @@ function ProductDetail() {
         <ArrowLeft className="size-3.5" /> Back to catalog
       </Link>
 
-      <div className="mt-6 grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+      <div data-demo-target="product" className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
         {/* Imagery + silhouette */}
         <div className="lg:sticky lg:top-[73px] lg:self-start">
           <div className="border border-border">

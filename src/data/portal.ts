@@ -81,6 +81,8 @@ export interface OrderLine {
 
 export interface DemoOrder {
   id: string;
+  /** Present on locally created demo orders; guards double submission. */
+  idempotencyKey?: string;
   accountId: string;
   po: string;
   date: string;
@@ -252,7 +254,7 @@ export const ACCOUNTS_LIST: DemoAccount[] = [
     ],
     alerts: [
       { tone: "action", text: "Invoice INV-89974 is past its due date." },
-      { tone: "info", text: "Early-payment discount on INV-90233 ends September 9, 2026." },
+      { tone: "info", text: "Early-payment discount on INV-90301 ends September 12, 2026." },
     ],
   },
 ];
@@ -394,7 +396,7 @@ export const INVOICES: DemoInvoice[] = [
     accountId: "D-1042",
     orderRef: "SO-24817",
     issueDate: "2026-08-25",
-    discountDate: "2026-09-09",
+    discountDate: "2026-09-04",
     dueDate: "2026-09-24",
     originalTotal: 2280,
     seedPaid: 0,
@@ -426,7 +428,7 @@ export const INVOICES: DemoInvoice[] = [
     orderRef: "SO-24631",
     issueDate: "2026-07-18",
     discountDate: "2026-08-02",
-    dueDate: "2026-08-17",
+    dueDate: "2026-09-01",
     originalTotal: 11237,
     seedPaid: 0,
     credit: 420,
@@ -455,7 +457,7 @@ export const INVOICES: DemoInvoice[] = [
     accountId: "D-1042",
     orderRef: "SO-24588",
     issueDate: "2026-07-30",
-    discountDate: "2026-08-14",
+    discountDate: "2026-08-09",
     dueDate: "2026-08-29",
     originalTotal: 2013,
     seedPaid: 2013,

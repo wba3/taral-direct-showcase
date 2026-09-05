@@ -61,8 +61,8 @@ function Overview() {
                     const result = reorder(lastOrder);
                     toast.success(`Reordered ${lastOrder.id}`, {
                       description: `${result.added} line(s) added${
-                        result.repriced > 0
-                          ? `, ${result.repriced} repriced at today's contract price`
+                        result.merged > 0
+                          ? `, ${result.merged} merged and repriced at today's contract price`
                           : ""
                       }.`,
                     });

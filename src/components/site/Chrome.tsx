@@ -53,7 +53,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-[2px]">
       <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 py-3">
         <Wordmark />
-        <nav aria-label="Main" className="ml-6 hidden items-center gap-6 md:flex">
+        <nav aria-label="Main" className="ml-6 hidden items-center gap-6 lg:flex">
           {NAV.map((item) => (
             <Link
               key={item.to}
@@ -65,7 +65,7 @@ export function SiteHeader() {
             </Link>
           ))}
         </nav>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex min-w-0 items-center gap-2">
           <Button variant="outline" size="sm" asChild>
             <Link to="/samples" aria-label={`Sample basket, ${count} items`}>
               <FlaskConical className="size-4" />
@@ -76,17 +76,17 @@ export function SiteHeader() {
           <Button size="sm" asChild className="hidden sm:inline-flex">
             <Link to="/portal">
               <UserRound className="size-4" />
-              {activeRole ? activeRole.label : "Account access"}
+              <span className="truncate">{activeRole ? activeRole.label : "Account access"}</span>
             </Link>
           </Button>
-          <Button variant="rail" size="sm" asChild className="hidden lg:inline-flex">
+          <Button variant="rail" size="sm" asChild className="hidden xl:inline-flex">
             <Link to="/demo-control">
               <SlidersHorizontal className="size-3.5" /> Demo controls
             </Link>
           </Button>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
+              <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu">
                 <Menu className="size-5" />
               </Button>
             </SheetTrigger>

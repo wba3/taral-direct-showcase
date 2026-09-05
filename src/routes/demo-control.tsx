@@ -90,7 +90,7 @@ function DemoControl() {
         </p>
       </div>
 
-      <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_340px]">
+      <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_340px]">
         <div className="min-w-0 space-y-10">
           <section aria-labelledby="roles-heading">
             <h2 id="roles-heading" className="font-display text-2xl font-bold tracking-tight">

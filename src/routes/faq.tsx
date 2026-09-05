@@ -89,7 +89,7 @@ function Faq() {
         </h1>
       </div>
 
-      <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_320px]">
+      <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_320px]">
         <div className="min-w-0 space-y-12">
           {GROUPS.map((group) => (
             <section key={group.heading} aria-labelledby={`faq-${group.heading}`}>
