@@ -3,62 +3,72 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Compass, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDemo } from "@/lib/demo-store";
-import { ACCOUNT } from "@/data/portal";
+import type { DemoRoleId } from "@/data/portal";
 
 interface Step {
   id: string;
   label: string;
   to: string;
+  params?: Record<string, string>;
   target: string;
   note: string;
-  needsPortal?: boolean;
+  role?: DemoRoleId;
 }
 
 export const DEMO_STEPS: Step[] = [
   {
-    id: "finder",
-    label: "Product finder",
-    to: "/",
-    target: "finder",
-    note: "Buyers start by specification: volume, neck finish, item code, or category.",
+    id: "catalog",
+    label: "Find the jar",
+    to: "/catalog",
+    target: "catalog",
+    note: "A buyer starts by specification: fill volume, neck finish, wall style, or item code.",
+  },
+  {
+    id: "product",
+    label: "Check the specification",
+    to: "/product/$id",
+    params: { id: "two-53-tw-blk" },
+    target: "product",
+    note: "Dimensions, case count, and matching closures by full thread finish — not diameter alone.",
   },
   {
     id: "samples",
-    label: "Sample cart",
+    label: "Request samples",
     to: "/samples",
     target: "sample-cart",
-    note: "Sample requests are the primary public conversion — cart, contact, ship method.",
+    note: "The public conversion: a small evaluation quantity, contact details, and ship method.",
   },
   {
-    id: "portal",
-    label: "Distributor portal",
-    to: "/portal",
-    target: "portal-entry",
-    note: "One command center: open orders, open balance, next payment, alerts.",
-    needsPortal: true,
-  },
-  {
-    id: "price-book",
-    label: "Private price book",
+    id: "pricing",
+    label: "Distributor pricing",
     to: "/portal/price-book",
     target: "price-book",
-    note: "Customer-specific pricing with effective dates and change history.",
-    needsPortal: true,
+    note: "Contract price, quantity breaks, and an announced change with its effective date.",
+    role: "buyer",
+  },
+  {
+    id: "order",
+    label: "Place an order",
+    to: "/portal/catalog",
+    target: "portal-catalog",
+    note: "Whole cases at the account's current price, reviewed against availability before submit.",
+    role: "buyer",
   },
   {
     id: "invoices",
-    label: "Invoices & payments",
+    label: "Finance and payment",
     to: "/portal/invoices",
     target: "invoices",
-    note: "Open balance, discount dates, and a clearly labeled demo payment flow.",
-    needsPortal: true,
+    note: "Outstanding balance, terms, discount deadline, and a simulated payment with no card details.",
+    role: "finance",
   },
   {
-    id: "blueprint",
-    label: "Integration blueprint",
-    to: "/integration",
-    target: "blueprint",
-    note: "How this front end would connect to Acumatica and a payment processor.",
+    id: "operations",
+    label: "Taral clears an exception",
+    to: "/portal/operations",
+    target: "operations",
+    note: "Staff process the sample request and finish a payment that was received but not yet posted.",
+    role: "ops",
   },
 ];
 
@@ -77,7 +87,7 @@ export function GuidedDemoProvider({ children }: { children: ReactNode }) {
   const [index, setIndex] = useState(0);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { accountId, enterDemo } = useDemo();
+  const { role, setRole } = useDemo();
 
   const step = DEMO_STEPS[index] ?? DEMO_STEPS[0]!;
 
@@ -85,11 +95,12 @@ export function GuidedDemoProvider({ children }: { children: ReactNode }) {
     (i: number) => {
       const next = DEMO_STEPS[Math.max(0, Math.min(DEMO_STEPS.length - 1, i))]!;
       setIndex(DEMO_STEPS.indexOf(next));
-      if (next.needsPortal && !accountId) enterDemo(ACCOUNT.id);
-      navigate({ to: next.to });
+      if (next.role && next.role !== role) setRole(next.role);
+      navigate({ to: next.to, params: next.params ?? {} } as never);
     },
-    [accountId, enterDemo, navigate],
+    [role, setRole, navigate],
   );
+
 
   const start = useCallback(() => {
     setRunning(true);
