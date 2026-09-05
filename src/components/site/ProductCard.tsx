@@ -4,6 +4,8 @@ import { money, type Product } from "@/data/products";
 import { ProductSilhouette } from "@/components/site/ProductSilhouette";
 import { DemoTag } from "@/components/site/DemoTag";
 import { cn } from "@/lib/utils";
+import { inventoryFor, orderMinimumFor, resolvePrice } from "@/data/portal";
+import { useDemo } from "@/lib/demo-store";
 import { useProductImage } from "@/lib/site-images";
 
 /** Real photo harvested from taralplastics.com, with silhouette fallback. */
