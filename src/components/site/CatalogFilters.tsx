@@ -27,16 +27,7 @@ export function useCatalogFilter(products: Product[], f: FilterState) {
       if (f.stock !== "any" && p.stock !== f.stock) return false;
       if (f.style !== "any" && p.styleFamily !== f.style) return false;
       if (!q) return true;
-      return [
-        p.code,
-        p.name,
-        p.category,
-        p.styleFamily,
-        p.size,
-        p.neck ?? "",
-        p.material,
-        p.color,
-      ]
+      return [p.code, p.name, p.category, p.styleFamily, p.size, p.neck ?? "", p.material, p.color]
         .join(" ")
         .toLowerCase()
         .includes(q);

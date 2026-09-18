@@ -124,7 +124,8 @@ function illustrativePrice(base: number) {
 }
 
 const jarPrice = (ml: number) => illustrativePrice(0.045 + ml * 0.0034);
-const capPrice = (mm: number, lined: boolean) => illustrativePrice(mm * 0.0021 + (lined ? 0.03 : 0));
+const capPrice = (mm: number, lined: boolean) =>
+  illustrativePrice(mm * 0.0021 + (lined ? 0.03 : 0));
 const discPrice = (mm: number) => illustrativePrice(0.006 + mm * 0.00035);
 
 const OPT = (label: string, stocked: boolean) => ({ label, stocked });
@@ -180,11 +181,7 @@ const REGULAR_WALL: JarSeed[] = [
     freightClass: "125",
     caseDims: '20" x 14" x 14.5"',
     moqEach: 100000,
-    options: [
-      OPT("Clarified PP", true),
-      OPT("White PP", true),
-      OPT("Crystal Clear PS", false),
-    ],
+    options: [OPT("Clarified PP", true), OPT("White PP", true), OPT("Crystal Clear PS", false)],
   },
   {
     id: "rw-half-33",
@@ -798,7 +795,8 @@ const THICK_WALL: JarSeed[] = [
 ];
 
 interface DoubleWallSeed extends JarSeed {
-  family: "Double wall — round base" | "Double wall — straight base" | "Double wall — in-mold frost";
+  family:
+    "Double wall — round base" | "Double wall — straight base" | "Double wall — in-mold frost";
   baseLabel: string;
 }
 
@@ -1299,7 +1297,10 @@ export const PRODUCTS: Product[] = [
     };
   }),
   ...DISCS.map((seed): Product => {
-    const colors = [OPT("White PET, glossy 0.010\"", true), OPT("Crystal Clear PET", seed.clearStocked)];
+    const colors = [
+      OPT('White PET, glossy 0.010"', true),
+      OPT("Crystal Clear PET", seed.clearStocked),
+    ];
     const price = discPrice(seed.neckMm);
     return {
       id: seed.id,
@@ -1458,12 +1459,7 @@ export const STYLE_USES: Record<string, string[]> = {
     "Arts, crafts & hobby",
     "Medical / lab testing",
   ],
-  "Thick (heavy) wall": [
-    "Creams & lotions",
-    "Hair care",
-    "Nail salons",
-    "Arts, crafts & hobby",
-  ],
+  "Thick (heavy) wall": ["Creams & lotions", "Hair care", "Nail salons", "Arts, crafts & hobby"],
   "Double wall — straight base": ["Creams & lotions", "Hair care"],
   "Double wall — round base": ["Creams & lotions", "Hair care"],
 };

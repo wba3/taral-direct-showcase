@@ -94,8 +94,8 @@ function Catalog() {
         <p className="label-caps text-muted-foreground">Product workbench</p>
         <h1 className="mt-2 font-display text-3xl font-bold tracking-tight">Catalog</h1>
         <p className="measure mt-2 text-sm text-muted-foreground">
-          Sizes, finishes, case counts and stocking status come from Taral's published product
-          data. Account pricing appears once you sign in; non-stock items route to a quote.
+          Sizes, finishes, case counts and stocking status come from Taral's published product data.
+          Account pricing appears once you sign in; non-stock items route to a quote.
         </p>
       </div>
 

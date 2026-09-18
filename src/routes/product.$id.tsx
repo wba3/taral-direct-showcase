@@ -5,12 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DemoTag } from "@/components/site/DemoTag";
 import { ProductSilhouette } from "@/components/site/ProductSilhouette";
 import { PriceState } from "@/components/site/ProductCard";
-import {
-  PROGRAM_RULES,
-  STYLE_USES,
-  compatibleWith,
-  getProduct,
-} from "@/data/products";
+import { PROGRAM_RULES, STYLE_USES, compatibleWith, getProduct } from "@/data/products";
 import { useDemo } from "@/lib/demo-store";
 import { useProductImage } from "@/lib/site-images";
 import detailImage from "@/assets/product-detail.jpg";
@@ -248,8 +243,8 @@ function ProductDetail() {
                 </p>
               )}
               <p className="spec-note mt-3">
-                Regular wall jars label on the body; thick wall and double wall jars have a
-                flush outer wall, so labels and shrink sleeves sit flat across the full height.
+                Regular wall jars label on the body; thick wall and double wall jars have a flush
+                outer wall, so labels and shrink sleeves sit flat across the full height.
               </p>
               <p className="spec-note mt-2">{PROGRAM_RULES.compliance}</p>
             </section>
@@ -260,7 +255,10 @@ function ProductDetail() {
               Shipping & availability
             </h2>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li>Stocked items generally ship within one business day from Corona, CA (FOB Corona, CA 92878).</li>
+              <li>
+                Stocked items generally ship within one business day from Corona, CA (FOB Corona, CA
+                92878).
+              </li>
               <li>
                 Available to sell:{" "}
                 <span className="tabular text-foreground">

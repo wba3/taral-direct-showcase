@@ -139,10 +139,10 @@ function Blueprint() {
         </p>
         <p className="measure mt-3 text-sm text-muted-foreground">
           Product specifications, case data, stocking status and minimum order quantities in this
-          prototype are transcribed from Taral's published product documents. Every price,
-          inventory figure, order and invoice is invented demo data. The real distributor price
-          list is confidential and is not reproduced here; in production those figures would come
-          from Acumatica.
+          prototype are transcribed from Taral's published product documents. Every price, inventory
+          figure, order and invoice is invented demo data. The real distributor price list is
+          confidential and is not reproduced here; in production those figures would come from
+          Acumatica.
         </p>
       </div>
 
