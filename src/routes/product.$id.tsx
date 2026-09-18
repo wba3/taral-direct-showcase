@@ -123,12 +123,23 @@ function ProductDetail() {
             {product.name}
           </h1>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="label-caps text-muted-foreground">Confirm availability</span>
-            {product.overstock && <DemoTag tone="neutral">Overstock</DemoTag>}
-            <DemoTag tone={product.source === "current-site" ? "neutral" : "illustrative"}>
-              {product.source === "current-site" ? "From current site" : "Illustrative"}
-            </DemoTag>
+            <span className="label-caps text-muted-foreground">
+              {product.stock === "In stock"
+                ? "Stock item · 1 case minimum"
+                : product.stock === "Overrun — call"
+                  ? "Not stocked · ask about overrun inventory"
+                  : "Made to order"}
+            </span>
+            <DemoTag tone="neutral">From Taral's published product data</DemoTag>
           </div>
+          {(product.moqEach || product.setupNote) && product.stock !== "In stock" && (
+            <p className="spec-note mt-2">
+              {product.moqEach
+                ? `Minimum order quantity ${product.moqEach.toLocaleString()} each.`
+                : ""}{" "}
+              {product.setupNote ?? PROGRAM_RULES.setup}
+            </p>
+          )}
 
           <div className="mt-6 grid gap-6 border-y border-border py-6 sm:grid-cols-[1fr_auto] sm:items-center">
             <PriceState product={product} mode="public" />
