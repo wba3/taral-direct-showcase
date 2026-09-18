@@ -202,6 +202,54 @@ function ProductDetail() {
             {product.notes && <p className="spec-note mt-3">{product.notes}</p>}
           </section>
 
+          {product.materialOptions.length > 0 && (
+            <section aria-labelledby="resin-heading" className="mt-8">
+              <h2 id="resin-heading" className="label-caps text-muted-foreground">
+                Colors & resins
+              </h2>
+              <ul className="mt-3 divide-y divide-border border-y border-border">
+                {product.materialOptions.map((option) => (
+                  <li
+                    key={option.label}
+                    className="flex items-center justify-between gap-4 py-2.5 text-sm"
+                  >
+                    <span>{option.label}</span>
+                    <span className="spec-note">
+                      {option.stocked ? "Stocked · 1 case minimum" : "Not stocked — call"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="spec-note mt-3">
+                {PROGRAM_RULES.customColor} {PROGRAM_RULES.pcr}
+              </p>
+            </section>
+          )}
+
+          {(uses.length > 0 || (product.lidStyles?.length ?? 0) > 0) && (
+            <section aria-labelledby="style-heading" className="mt-8">
+              <h2 id="style-heading" className="label-caps text-muted-foreground">
+                Style, lids & labeling
+              </h2>
+              {product.lidStyles && product.lidStyles.length > 0 && (
+                <p className="mt-3 text-sm text-muted-foreground">
+                  Lid styles Taral pairs with this jar:{" "}
+                  <span className="text-foreground">{product.lidStyles.join(", ")}</span>.
+                </p>
+              )}
+              {uses.length > 0 && (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Common uses: <span className="text-foreground">{uses.join(", ")}</span>.
+                </p>
+              )}
+              <p className="spec-note mt-3">
+                Regular wall jars label on the body; thick wall and double wall jars have a
+                flush outer wall, so labels and shrink sleeves sit flat across the full height.
+              </p>
+              <p className="spec-note mt-2">{PROGRAM_RULES.compliance}</p>
+            </section>
+          )}
+
           <section aria-labelledby="ship-heading" className="mt-8">
             <h2 id="ship-heading" className="label-caps text-muted-foreground">
               Shipping & availability
