@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { CATEGORIES, type Product } from "@/data/products";
+import { CATEGORIES, STOCK_STATUSES, type Product } from "@/data/products";
 
 export interface FilterState {
   q: string;
@@ -8,6 +8,7 @@ export interface FilterState {
   neck: string;
   color: string;
   stock: string;
+  style: string;
 }
 
 export function useCatalogFilter(products: Product[], f: FilterState) {
@@ -17,10 +18,25 @@ export function useCatalogFilter(products: Product[], f: FilterState) {
       if (f.category !== "any" && p.category !== f.category) return false;
       if (f.volume !== "any" && p.size !== f.volume) return false;
       if (f.neck !== "any" && p.neck !== f.neck) return false;
-      if (f.color !== "any" && p.color !== f.color) return false;
+      if (
+        f.color !== "any" &&
+        !p.materialOptions.some((o) => o.label === f.color) &&
+        p.color !== f.color
+      )
+        return false;
       if (f.stock !== "any" && p.stock !== f.stock) return false;
+      if (f.style !== "any" && p.styleFamily !== f.style) return false;
       if (!q) return true;
-      return [p.code, p.name, p.category, p.size, p.neck ?? "", p.material, p.color]
+      return [
+        p.code,
+        p.name,
+        p.category,
+        p.styleFamily,
+        p.size,
+        p.neck ?? "",
+        p.material,
+        p.color,
+      ]
         .join(" ")
         .toLowerCase()
         .includes(q);
@@ -86,7 +102,10 @@ export function CatalogFilters({
   const necks = Array.from(
     new Set(products.map((p) => p.neck).filter((n): n is string => Boolean(n))),
   ).sort((a, b) => parseInt(a) - parseInt(b));
-  const colors = Array.from(new Set(products.map((p) => p.color)));
+  const colors = Array.from(
+    new Set(products.flatMap((p) => p.materialOptions.map((o) => o.label))),
+  ).sort();
+  const styles = Array.from(new Set(products.map((p) => p.styleFamily)));
   const counts = products.reduce<Record<string, number>>((acc, p) => {
     acc[p.category] = (acc[p.category] ?? 0) + 1;
     return acc;
@@ -122,7 +141,14 @@ export function CatalogFilters({
             onChange={(v) => onChange((f) => ({ ...f, neck: v }))}
           />
           <Group
-            legend="Color / material"
+            legend="Wall style"
+            name="f-style"
+            options={styles}
+            value={filters.style}
+            onChange={(v) => onChange((f) => ({ ...f, style: v }))}
+          />
+          <Group
+            legend="Color / resin"
             name="f-color"
             options={colors}
             value={filters.color}
@@ -131,7 +157,7 @@ export function CatalogFilters({
           <Group
             legend="Stocking status"
             name="f-stock"
-            options={["In stock", "Low stock", "Made to order"]}
+            options={[...STOCK_STATUSES]}
             value={filters.stock}
             onChange={(v) => onChange((f) => ({ ...f, stock: v }))}
           />

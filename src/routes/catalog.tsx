@@ -57,6 +57,7 @@ function Catalog() {
     neck: search.neck ?? "any",
     color: "any",
     stock: "any",
+    style: "any",
   });
 
   const results = useCatalogFilter(PRODUCTS, filters);
@@ -69,6 +70,7 @@ function Catalog() {
     if (filters.neck !== "any") out.push({ key: "neck", label: filters.neck });
     if (filters.color !== "any") out.push({ key: "color", label: filters.color });
     if (filters.stock !== "any") out.push({ key: "stock", label: filters.stock });
+    if (filters.style !== "any") out.push({ key: "style", label: filters.style });
     return out;
   }, [filters]);
 
@@ -76,7 +78,15 @@ function Catalog() {
     setFilters((f) => ({ ...f, [key]: key === "q" ? "" : "any" }));
 
   const reset = () =>
-    setFilters({ q: "", category: "any", volume: "any", neck: "any", color: "any", stock: "any" });
+    setFilters({
+      q: "",
+      category: "any",
+      volume: "any",
+      neck: "any",
+      color: "any",
+      stock: "any",
+      style: "any",
+    });
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-8">

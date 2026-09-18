@@ -43,6 +43,7 @@ function PrivateCatalog() {
     neck: "any",
     color: "any",
     stock: "any",
+    style: "any",
   });
   const [po, setPo] = useState("");
   const [review, setReview] = useState<{ ok: boolean; message: string } | null>(null);
