@@ -698,7 +698,11 @@ export const INVENTORY: InventorySnapshot[] = [
 export const inventoryFor = (productId: string) =>
   INVENTORY.find((i) => i.productId === productId) ?? null;
 
-/** Starting whole-case quantity for an account and its first current price tier. */
+/**
+ * Starting whole-case quantity: the larger of the account's case minimum and
+ * the first current price tier. Taral's stocking program sets a 1 case minimum
+ * on stock items, so nothing here goes below one case.
+ */
 export function orderMinimumFor(accountId: string | null, productId: string) {
   const tiers = priceBookFor(accountId).filter(
     (r) => r.productId === productId && !isFuture(r.effective),
