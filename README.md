@@ -50,7 +50,8 @@ A real interactive product workbench:
 - Cards show product silhouette/image, item code, size, neck finish, case count, availability, and pricing state.
 - Public users see “Public list price” only where supplied and “Request quote” elsewhere.
 - Use these factual current-site examples:
-  * 1/4 oz 33mm Regular Wall White Polypropylene; item code 1/4-33-RW-WPPT; white polypropylene #5 PP; 33mm-400; $0.07/item; 2,000/case; $148/case; in stock; overstock; height 1.17 in; opening 1.06 in; max fill 14 ml.
+  * 1/4 oz 33mm Regular Wall Jar; base item code 1/4-33-RW-PPT; clarified or white PP; 33mm-400; 2,000/case; 16 lb/case; 42 cases/pallet; freight class 125; 1.13" high, 1.05" ID, 14 ml max fill; stock item at a 1 case minimum.
+  * Specifications come from Taral's published product documents. Prices in the prototype are invented placeholders; the real distributor price list is confidential and is not reproduced.
   * Product families and sizes from 1/8 oz through 32 oz.
 - Add at least 12 realistic demo products spanning jars, closures, discs, and add-ons. Any invented price or inventory value must carry an “Illustrative” marker.
 
