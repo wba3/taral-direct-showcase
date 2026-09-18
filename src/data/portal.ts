@@ -191,7 +191,7 @@ export const ACCOUNTS_LIST: DemoAccount[] = [
     terms: "Net 30 · 1% 10 net 30",
     priceClass: "DIST-2",
     caseMinimum: 1,
-    smallOrderFee: "$45 handling under 5 cases",
+    smallOrderFee: "$300 minimum order excluding freight, or a $50 small order fee",
     asOf: DEMO_AS_OF,
     contacts: [
       {
@@ -229,7 +229,7 @@ export const ACCOUNTS_LIST: DemoAccount[] = [
     terms: "Net 45 · 2% 15 net 45",
     priceClass: "DIST-4",
     caseMinimum: 2,
-    smallOrderFee: "$45 handling under 5 cases",
+    smallOrderFee: "$300 minimum order excluding freight, or a $50 small order fee",
     asOf: DEMO_AS_OF,
     contacts: [
       {
