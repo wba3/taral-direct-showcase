@@ -159,6 +159,12 @@ function PriceBook() {
           </p>
         )}
 
+        <p className="mb-4 border border-dashed border-border p-3 text-sm text-muted-foreground">
+          Every figure on this page is a placeholder. Taral's real distributor price list is a
+          separate, confidential document and is not reproduced anywhere in this prototype.
+        </p>
+
+
         <div className="overflow-x-auto border border-border">
           <table className="w-full min-w-[980px] border-collapse text-sm">
             <caption className="sr-only">Price book for {account.name}</caption>
