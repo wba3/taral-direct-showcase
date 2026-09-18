@@ -27,7 +27,7 @@ export const DEMO_STEPS: Step[] = [
     id: "product",
     label: "Check the specification",
     to: "/product/$id",
-    params: { id: "two-53-tw-blk" },
+    params: { id: "rw-four-70" },
     target: "product",
     note: "Dimensions, case count, and matching closures by full thread finish — not diameter alone.",
   },

@@ -95,9 +95,9 @@ function PriceBook() {
       intro={
         <div className="measure space-y-2 text-sm text-muted-foreground">
           <p>
-            Pricing for {account.name} (class {account.priceClass}). Each row shows the basis for the
-            price — published list, your price class, or a negotiated override — with the quantity
-            break it applies from.
+            Pricing for {account.name} (class {account.priceClass}). Each row shows the basis for
+            the price — published list, your price class, or a negotiated override — with the
+            quantity break it applies from.
           </p>
           <p className="label-caps text-foreground">
             Announced changes take effect on their date, not before.
@@ -158,6 +158,11 @@ function PriceBook() {
             date had arrived. <DemoTag tone="illustrative">Simulated</DemoTag>
           </p>
         )}
+
+        <p className="mb-4 border border-dashed border-border p-3 text-sm text-muted-foreground">
+          Every figure on this page is a placeholder. Taral's real distributor price list is a
+          separate, confidential document and is not reproduced anywhere in this prototype.
+        </p>
 
         <div className="overflow-x-auto border border-border">
           <table className="w-full min-w-[980px] border-collapse text-sm">

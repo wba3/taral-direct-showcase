@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DemoTag } from "@/components/site/DemoTag";
 import { ProductSilhouette } from "@/components/site/ProductSilhouette";
 import { PriceState } from "@/components/site/ProductCard";
-import { compatibleWith, getProduct, money } from "@/data/products";
+import { PROGRAM_RULES, STYLE_USES, compatibleWith, getProduct } from "@/data/products";
 import { useDemo } from "@/lib/demo-store";
 import { useProductImage } from "@/lib/site-images";
 import detailImage from "@/assets/product-detail.jpg";
@@ -45,18 +45,24 @@ function ProductDetail() {
   const { addSample } = useDemo();
   const realImage = useProductImage(product);
   const matches = compatibleWith(product);
-  const custom = product.demoUnitPrice === null && product.publicUnitPrice === null;
+  const custom = product.stock !== "In stock";
+  const uses = STYLE_USES[product.styleFamily] ?? [];
 
   const specRows: [string, string][] = [
-    ["Item code", product.code],
+    ["Base item code", product.code],
     ["Category", product.category],
+    ["Style", product.styleFamily],
     ["Nominal fill volume", product.size],
     ["Thread finish", product.neck ?? "Not threaded"],
     ["Material", product.material],
-    ["Color", product.color],
+    ["Stocked color", product.color],
     ["Case count", `${product.caseCount.toLocaleString()} per case`],
+    ["Case weight", product.caseWeightLb ? `${product.caseWeightLb} lb` : "—"],
+    ["Case dimensions", product.caseDims ?? "—"],
+    ["Cases per pallet", product.casesPerPallet ? `${product.casesPerPallet}` : "—"],
+    ["Freight class", product.freightClass ?? "—"],
     ["Height", product.dims?.height ?? "—"],
-    ["Opening", product.dims?.opening ?? "—"],
+    ["Diameter", product.dims?.opening ?? "—"],
     ["Maximum fill", product.dims?.maxFill ?? "—"],
   ];
 
@@ -117,12 +123,23 @@ function ProductDetail() {
             {product.name}
           </h1>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="label-caps text-muted-foreground">Confirm availability</span>
-            {product.overstock && <DemoTag tone="neutral">Overstock</DemoTag>}
-            <DemoTag tone={product.source === "current-site" ? "neutral" : "illustrative"}>
-              {product.source === "current-site" ? "From current site" : "Illustrative"}
-            </DemoTag>
+            <span className="label-caps text-muted-foreground">
+              {product.stock === "In stock"
+                ? "Stock item · 1 case minimum"
+                : product.stock === "Overrun — call"
+                  ? "Not stocked · ask about overrun inventory"
+                  : "Made to order"}
+            </span>
+            <DemoTag tone="neutral">From Taral's published product data</DemoTag>
           </div>
+          {(product.moqEach || product.setupNote) && product.stock !== "In stock" && (
+            <p className="spec-note mt-2">
+              {product.moqEach
+                ? `Minimum order quantity ${product.moqEach.toLocaleString()} each.`
+                : ""}{" "}
+              {product.setupNote ?? PROGRAM_RULES.setup}
+            </p>
+          )}
 
           <div className="mt-6 grid gap-6 border-y border-border py-6 sm:grid-cols-[1fr_auto] sm:items-center">
             <PriceState product={product} mode="public" />
@@ -185,12 +202,63 @@ function ProductDetail() {
             {product.notes && <p className="spec-note mt-3">{product.notes}</p>}
           </section>
 
+          {product.materialOptions.length > 0 && (
+            <section aria-labelledby="resin-heading" className="mt-8">
+              <h2 id="resin-heading" className="label-caps text-muted-foreground">
+                Colors & resins
+              </h2>
+              <ul className="mt-3 divide-y divide-border border-y border-border">
+                {product.materialOptions.map((option) => (
+                  <li
+                    key={option.label}
+                    className="flex items-center justify-between gap-4 py-2.5 text-sm"
+                  >
+                    <span>{option.label}</span>
+                    <span className="spec-note">
+                      {option.stocked ? "Stocked · 1 case minimum" : "Not stocked — call"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="spec-note mt-3">
+                {PROGRAM_RULES.customColor} {PROGRAM_RULES.pcr}
+              </p>
+            </section>
+          )}
+
+          {(uses.length > 0 || (product.lidStyles?.length ?? 0) > 0) && (
+            <section aria-labelledby="style-heading" className="mt-8">
+              <h2 id="style-heading" className="label-caps text-muted-foreground">
+                Style, lids & labeling
+              </h2>
+              {product.lidStyles && product.lidStyles.length > 0 && (
+                <p className="mt-3 text-sm text-muted-foreground">
+                  Lid styles Taral pairs with this jar:{" "}
+                  <span className="text-foreground">{product.lidStyles.join(", ")}</span>.
+                </p>
+              )}
+              {uses.length > 0 && (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Common uses: <span className="text-foreground">{uses.join(", ")}</span>.
+                </p>
+              )}
+              <p className="spec-note mt-3">
+                Regular wall jars label on the body; thick wall and double wall jars have a flush
+                outer wall, so labels and shrink sleeves sit flat across the full height.
+              </p>
+              <p className="spec-note mt-2">{PROGRAM_RULES.compliance}</p>
+            </section>
+          )}
+
           <section aria-labelledby="ship-heading" className="mt-8">
             <h2 id="ship-heading" className="label-caps text-muted-foreground">
               Shipping & availability
             </h2>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li>Stocked items generally ship within one business day.</li>
+              <li>
+                Stocked items generally ship within one business day from Corona, CA (FOB Corona, CA
+                92878).
+              </li>
               <li>
                 Available to sell:{" "}
                 <span className="tabular text-foreground">

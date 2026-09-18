@@ -57,6 +57,7 @@ function Catalog() {
     neck: search.neck ?? "any",
     color: "any",
     stock: "any",
+    style: "any",
   });
 
   const results = useCatalogFilter(PRODUCTS, filters);
@@ -69,6 +70,7 @@ function Catalog() {
     if (filters.neck !== "any") out.push({ key: "neck", label: filters.neck });
     if (filters.color !== "any") out.push({ key: "color", label: filters.color });
     if (filters.stock !== "any") out.push({ key: "stock", label: filters.stock });
+    if (filters.style !== "any") out.push({ key: "style", label: filters.style });
     return out;
   }, [filters]);
 
@@ -76,7 +78,15 @@ function Catalog() {
     setFilters((f) => ({ ...f, [key]: key === "q" ? "" : "any" }));
 
   const reset = () =>
-    setFilters({ q: "", category: "any", volume: "any", neck: "any", color: "any", stock: "any" });
+    setFilters({
+      q: "",
+      category: "any",
+      volume: "any",
+      neck: "any",
+      color: "any",
+      stock: "any",
+      style: "any",
+    });
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-8">
@@ -84,8 +94,8 @@ function Catalog() {
         <p className="label-caps text-muted-foreground">Product workbench</p>
         <h1 className="mt-2 font-display text-3xl font-bold tracking-tight">Catalog</h1>
         <p className="measure mt-2 text-sm text-muted-foreground">
-          Public pricing appears where Taral publishes it. Everything else routes to a quote. Case
-          counts, dimensions, and finishes are the specification of record.
+          Sizes, finishes, case counts and stocking status come from Taral's published product data.
+          Account pricing appears once you sign in; non-stock items route to a quote.
         </p>
       </div>
 
@@ -164,9 +174,9 @@ function Catalog() {
             <div className="mt-6 border border-dashed border-border p-10 text-center">
               <h2 className="font-display text-lg font-semibold">No items match this spec</h2>
               <p className="measure mx-auto mt-2 text-sm text-muted-foreground">
-                Taral molds sizes from 1/8 oz through 32 oz, and custom colors or printing are
-                quoted per run. Loosen a filter, or send the specification and we'll come back with
-                options.
+                Taral molds sizes from 1/8 oz through 32 oz, and custom colors, PCR resin or UV
+                screen printing are quoted per run. Loosen a filter, or send the specification and
+                we'll come back with options.
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-3">
                 <Button variant="outline" onClick={reset}>
@@ -199,7 +209,7 @@ function Catalog() {
                   view={view}
                   mode="public"
                   action={
-                    product.stock === "Made to order" ? (
+                    product.stock !== "In stock" ? (
                       <Button
                         variant="outline"
                         size="sm"

@@ -169,7 +169,7 @@ function Home() {
                   id="finder-q"
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="e.g. 1/4-33-RW-WPPT, 33mm, double wall"
+                  placeholder="e.g. 4-70-RW-PP, 89mm, double wall"
                   className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
                 />
               </div>
