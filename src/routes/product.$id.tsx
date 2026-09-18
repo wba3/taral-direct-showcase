@@ -5,7 +5,12 @@ import { Button } from "@/components/ui/button";
 import { DemoTag } from "@/components/site/DemoTag";
 import { ProductSilhouette } from "@/components/site/ProductSilhouette";
 import { PriceState } from "@/components/site/ProductCard";
-import { compatibleWith, getProduct, money } from "@/data/products";
+import {
+  PROGRAM_RULES,
+  STYLE_USES,
+  compatibleWith,
+  getProduct,
+} from "@/data/products";
 import { useDemo } from "@/lib/demo-store";
 import { useProductImage } from "@/lib/site-images";
 import detailImage from "@/assets/product-detail.jpg";
@@ -255,7 +260,7 @@ function ProductDetail() {
               Shipping & availability
             </h2>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li>Stocked items generally ship within one business day.</li>
+              <li>Stocked items generally ship within one business day from Corona, CA (FOB Corona, CA 92878).</li>
               <li>
                 Available to sell:{" "}
                 <span className="tabular text-foreground">

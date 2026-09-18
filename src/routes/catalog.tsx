@@ -84,8 +84,8 @@ function Catalog() {
         <p className="label-caps text-muted-foreground">Product workbench</p>
         <h1 className="mt-2 font-display text-3xl font-bold tracking-tight">Catalog</h1>
         <p className="measure mt-2 text-sm text-muted-foreground">
-          Public pricing appears where Taral publishes it. Everything else routes to a quote. Case
-          counts, dimensions, and finishes are the specification of record.
+          Sizes, finishes, case counts and stocking status come from Taral's published product
+          data. Account pricing appears once you sign in; non-stock items route to a quote.
         </p>
       </div>
 
@@ -164,9 +164,9 @@ function Catalog() {
             <div className="mt-6 border border-dashed border-border p-10 text-center">
               <h2 className="font-display text-lg font-semibold">No items match this spec</h2>
               <p className="measure mx-auto mt-2 text-sm text-muted-foreground">
-                Taral molds sizes from 1/8 oz through 32 oz, and custom colors or printing are
-                quoted per run. Loosen a filter, or send the specification and we'll come back with
-                options.
+                Taral molds sizes from 1/8 oz through 32 oz, and custom colors, PCR resin or UV
+                screen printing are quoted per run. Loosen a filter, or send the specification and
+                we'll come back with options.
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-3">
                 <Button variant="outline" onClick={reset}>
@@ -199,7 +199,7 @@ function Catalog() {
                   view={view}
                   mode="public"
                   action={
-                    product.stock === "Made to order" ? (
+                    product.stock !== "In stock" ? (
                       <Button
                         variant="outline"
                         size="sm"
