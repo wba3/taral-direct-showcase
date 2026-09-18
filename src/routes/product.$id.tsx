@@ -45,18 +45,24 @@ function ProductDetail() {
   const { addSample } = useDemo();
   const realImage = useProductImage(product);
   const matches = compatibleWith(product);
-  const custom = product.demoUnitPrice === null && product.publicUnitPrice === null;
+  const custom = product.stock !== "In stock";
+  const uses = STYLE_USES[product.styleFamily] ?? [];
 
   const specRows: [string, string][] = [
-    ["Item code", product.code],
+    ["Base item code", product.code],
     ["Category", product.category],
+    ["Style", product.styleFamily],
     ["Nominal fill volume", product.size],
     ["Thread finish", product.neck ?? "Not threaded"],
     ["Material", product.material],
-    ["Color", product.color],
+    ["Stocked color", product.color],
     ["Case count", `${product.caseCount.toLocaleString()} per case`],
+    ["Case weight", product.caseWeightLb ? `${product.caseWeightLb} lb` : "—"],
+    ["Case dimensions", product.caseDims ?? "—"],
+    ["Cases per pallet", product.casesPerPallet ? `${product.casesPerPallet}` : "—"],
+    ["Freight class", product.freightClass ?? "—"],
     ["Height", product.dims?.height ?? "—"],
-    ["Opening", product.dims?.opening ?? "—"],
+    ["Diameter", product.dims?.opening ?? "—"],
     ["Maximum fill", product.dims?.maxFill ?? "—"],
   ];
 
